@@ -37,7 +37,7 @@ void screen(int score, int level){
     for(int i = 0; i < 21; i++){
         cout << "-";
     }
-    // 为啥：
+    // 为啥：for test
     cout << endl;
     
     // 为啥：立即打印到终端；sleep会使进程休眠
