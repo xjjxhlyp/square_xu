@@ -46,19 +46,24 @@ MainScene::MainScene() {
     }
     cells.back() = std::vector<Cell>(CellNumberPerRow, Cell{Cell::BottomBoundary});
 }
-    
+
+int shapeWidth(std::vector<std::vector<Cell>> squares){
+    int width = squares[0].size();
+    for(int i = 1; i < squares.size(); i++){
+        int rowWidth =squares[i].size();
+         width= std::max(width, rowWidth);
+    }
+    return width;
+}
+
+
 bool MainScene::canJoin(std::vector<std::vector<Cell>> squares, int x, int y){
     if (x <= 0 || x  >= CellNumberPerCol - squares.size()) {
         return false;
     }
     //要保证整个图形不会超出边界
-    int cols = squares[0].size();
-    for(int i = 1; i < squares.size(); i++){
-        int col =squares[i].size();
-        cols = std::max(cols, col);
-    }
-    
-    if (y <= 0 || y >= CellNumberPerRow - cols) {
+    int width = shapeWidth(squares);
+    if (y <= 0 || y >= CellNumberPerRow - width) {
         return false;
     }
     for(int i = 0; i < squares.size(); i++){
@@ -72,12 +77,7 @@ bool MainScene::canJoin(std::vector<std::vector<Cell>> squares, int x, int y){
 }
     
 void MainScene::joinSquare(std::vector<std::vector<Cell>> squares, int x, int y) {
-    if (x <= 0 || x >= CellNumberPerCol - squares.size()) {
-        return;
-    }
-    if (y <= 0 || y >= CellNumberPerRow - 1) {
-        return;
-    }
+    if(!canJoin((squares), x, y)) return;
     for (int i = 0; i < squares.size(); i++) {
         for (int j = 0; j < squares[i].size(); j++) {//squares每行元素个数不一定一样
             cells[x + i][y + j] = squares[i][j];
