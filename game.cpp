@@ -15,17 +15,17 @@
 #include <vector>
 
 std::ostream& operator<<(std::ostream& out, Cell& cell) {
-    if (cell.type == 1) {
+    if (cell.type == Cell::LeftBoundary) {
         std::cout << " |";
-    } else if (cell.type == 2) {
+    } else if (cell.type == Cell::RightBoundary) {
         std::cout << "| ";
-    } else if (cell.type == 3) {
+    } else if (cell.type == Cell::TopBoundary) {
         std::cout << "__";
-    } else if (cell.type == 4) {
+    } else if (cell.type == Cell::BottomBoundary) {
         std::cout << "--";
-    } else if (cell.type == 5) {
+    } else if (cell.type == Cell::Space) {
         std::cout << "  " ;
-    } else if (cell.type == 6) {
+    } else if (cell.type == Cell::Square) {
         std::cout << "🟥";
     }
     return out;
@@ -35,15 +35,15 @@ std::ostream& operator<<(std::ostream& out, Cell& cell) {
 MainScene::MainScene() {
     cells.resize(CellNumberPerCol);
         
-    cells[0] = std::vector<Cell>(CellNumberPerRow, Cell{3});
+    cells[0] = std::vector<Cell>(CellNumberPerRow, Cell{Cell::TopBoundary});
     for (int i = 1; i < CellNumberPerCol - 1; i++) {
-        cells[i].push_back(Cell{1});
+        cells[i].push_back(Cell{Cell::LeftBoundary});
         for (int j = 1; j < CellNumberPerRow - 1; j++) {
-            cells[i].push_back(Cell{5});
+            cells[i].push_back(Cell{Cell::Space});
         }
-        cells[i].push_back(Cell{2});
+        cells[i].push_back(Cell{Cell::RightBoundary});
     }
-    cells.back() = std::vector<Cell>(CellNumberPerRow, Cell{4});
+    cells.back() = std::vector<Cell>(CellNumberPerRow, Cell{Cell::BottomBoundary});
 }
     
 bool MainScene::canJoin(std::vector<std::vector<Cell>> squares, int x, int y){
@@ -79,7 +79,7 @@ void MainScene::joinSquare(std::vector<std::vector<Cell>> squares, int x, int y)
 void MainScene::cleanSquare(std::vector<std::vector<Cell>> squares, int x, int y){
     for (int i = 0; i < squares.size(); i++) {
         for (int j = 0; j < squares[0].size(); j++) {
-            cells[x + i][y + j] = Cell{5};
+            cells[x + i][y + j] = Cell{Cell::Space};
         }
     }
 }

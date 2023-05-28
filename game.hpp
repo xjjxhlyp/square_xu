@@ -14,19 +14,32 @@
 
 
 class Cell {
-    int type;
 public:
-    Cell(int t): type(t) {}
-    bool canJoin(const Cell& cell) {return (this->type == 5 || cell.type == 5);}
+    enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
+    Cell(CellType t): type(t) {}
+    bool canJoin(const Cell& cell) {return (this->type == Space || cell.type == Space);}
     friend std::ostream& operator<<(std::ostream& out, Cell& cell);
     friend bool operator==(const Cell& cell1, const Cell& cell2) {return cell1.type == cell2.type;}
+private:
+    CellType type;
 };
 
 class SquareShape {
 public:
     std::vector<std::vector<Cell>> cells;
     SquareShape() {
-        cells = {{Cell{6}, Cell{6}}, {Cell{6}, Cell{6}}};
+        cells = {{Cell{Cell::Square}, Cell{Cell::Square}}, {Cell{Cell::Square}, Cell{Cell::Square}}};
+    }
+};
+
+class LShape{
+public:
+    std::vector<std::vector<Cell>> cells;
+    LShape() {
+        cells = {
+            {Cell{Cell::Square}},
+            {Cell{Cell::Square}},
+            {Cell{Cell::Square},Cell{Cell::Square}}};
     }
 };
 

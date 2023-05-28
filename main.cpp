@@ -18,11 +18,13 @@ int main() {
     
     MainScene ms;
     ms.print();
-    ms.joinSquare({{Cell{6}, Cell{5},Cell{5}}, {Cell{6}, Cell{5},Cell{5}},{Cell{6}, Cell{6},Cell{5}}}, 27, 1);
+    
+    LShape lshape;
+    ms.joinSquare(lshape.cells, 2, 1);
     ms.print();
     Move mo;
     
-    mo.move(ms, {{Cell{6}, Cell{5},Cell{5}}, {Cell{6}, Cell{5},Cell{5}},{Cell{6}, Cell{6},Cell{5}}}, 26, 1, Move::Down);
+    mo.move(ms, lshape.cells, 2, 1, Move::Down);
     //mo.move(ms, {{Cell{6}, Cell{6}}, {Cell{6}, Cell{6}}}, 3, 5, 1, 0);
     ms.print();
     return 0;
