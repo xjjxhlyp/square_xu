@@ -54,7 +54,7 @@ bool MainScene::canJoin(std::vector<std::vector<Cell>> squares, int x, int y){
         return false;
     }
     for(int i = 0; i < squares.size(); i++){
-        for(int j = 0; j < squares[0].size(); j++){
+        for(int j = 0; j < squares[i].size(); j++){ //squares每行元素个数不一定一样
             if (!squares[i][j].canJoin(cells[x + i][y + j])) {
                 return false;
             }
@@ -71,14 +71,14 @@ void MainScene::joinSquare(std::vector<std::vector<Cell>> squares, int x, int y)
         return;
     }
     for (int i = 0; i < squares.size(); i++) {
-        for (int j = 0; j < squares[0].size(); j++) {
+        for (int j = 0; j < squares[i].size(); j++) {//squares每行元素个数不一定一样
             cells[x + i][y + j] = squares[i][j];
         }
     }
 }
 void MainScene::cleanSquare(std::vector<std::vector<Cell>> squares, int x, int y){
     for (int i = 0; i < squares.size(); i++) {
-        for (int j = 0; j < squares[0].size(); j++) {
+        for (int j = 0; j < squares[i].size(); j++) {//squares每行元素个数不一定一样
             cells[x + i][y + j] = Cell{Cell::Space};
         }
     }
