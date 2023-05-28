@@ -20,11 +20,11 @@ int main() {
     ms.print();
     
     LShape lshape;
-    ms.joinSquare(lshape.cells, 2, 1);
+    ms.joinSquare(lshape.cells, 1, 17);
     ms.print();
     Move mo;
     
-    mo.move(ms, lshape.cells, 2, 1, Move::Down);
+    mo.move(ms, lshape.cells, 1, 17, Move::Right);
     //mo.move(ms, {{Cell{6}, Cell{6}}, {Cell{6}, Cell{6}}}, 3, 5, 1, 0);
     ms.print();
     return 0;
