@@ -23,21 +23,6 @@ public:
 private:
     CellType type;
 };
-class testShape{
-    std::vector<Cell> cell3 {18, Cell{Cell::Square}};
-    std::vector<Cell> cell4 {16, Cell{Cell::Square}};
-public:
-    std::vector<std::vector<Cell>> cells;
-    testShape() {
-        cells.push_back(cell3);
-        cells.push_back(cell4);
-        //cell.resize(0);
-        /*for(int i = 0; i < 16; i++){
-            cell.push_back(Cell{Cell::Square});
-        }
-        cells.push_back(cell);*/
-    }
-};
 
 class SquareShape {
 public:
@@ -75,7 +60,8 @@ public:
     void joinSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void cleanSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void print();
-    bool isRemove(int row);
+private:
+    bool canRemove(int row);
     void RemoveOneRow(int row);
 };
 

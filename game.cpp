@@ -125,7 +125,7 @@ void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, in
     }
 }
 
-bool MainScene::isRemove(int row){
+bool MainScene::canRemove(int row){
     for(int i = 1; i < cells[i].size() - 1; i++){
         if(cells[row][i] == Cell{Cell::Space}){
             return false;
@@ -135,7 +135,7 @@ bool MainScene::isRemove(int row){
 }
 
 void MainScene::RemoveOneRow(int row){
-    if(isRemove(row)){
+    if(canRemove(row)){
         for(int i = 1; i < cells[i].size()-1; i++){
             cells[row][i] = Cell{Cell::Space};
         }
