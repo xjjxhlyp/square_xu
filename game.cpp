@@ -124,3 +124,22 @@ void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, in
         ms.joinSquare(squares, x, y);
     }
 }
+
+bool MainScene::canRemove(int row){
+    for(int i = 1; i < cells[i].size() - 1; i++){
+        if(cells[row][i] == Cell{Cell::Space}){
+            return false;
+        }
+    }
+    return true;
+}
+
+void MainScene::RemoveOneRow(int row){
+    if(canRemove(row)){
+        for(int i = 1; i < cells[i].size()-1; i++){
+            cells[row][i] = Cell{Cell::Space};
+        }
+    }
+}
+
+

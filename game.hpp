@@ -30,7 +30,10 @@ public:
     SquareShape() {
         cells = {{Cell{Cell::Square}, Cell{Cell::Square}}, {Cell{Cell::Square}, Cell{Cell::Square}}};
     }
+    
 };
+
+
 
 class LShape{
 public:
@@ -39,9 +42,12 @@ public:
         cells = {
             {Cell{Cell::Square}},
             {Cell{Cell::Square}},
-            {Cell{Cell::Square},Cell{Cell::Square}}};
+            {Cell{Cell::Square},Cell{Cell::Square}}
+            
+        };
     }
 };
+
 
 class MainScene {
     const int CellNumberPerRow = 20;
@@ -54,6 +60,9 @@ public:
     void joinSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void cleanSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void print();
+private:
+    bool canRemove(int row);
+    void RemoveOneRow(int row);
 };
 
 class Move {
@@ -64,5 +73,6 @@ public:
     };
     void move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
 };
+
 
 #endif /* game_hpp */
