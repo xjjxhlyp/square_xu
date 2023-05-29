@@ -6,7 +6,6 @@
 //
 
 #include "game.hpp"
-#include <gtest/gtest.h>
 
 
 int main() {
@@ -17,15 +16,12 @@ int main() {
     //show(3,4,0,1, "口");
     
     MainScene ms;
+    testShape testshape;
+    ms.joinSquare(testshape.cells, 21, 1);
     ms.print();
+    ms.RemoveOneRow(21);
     
-    LShape lshape;
-    ms.joinSquare(lshape.cells, 1, 17);
-    ms.print();
-    Move mo;
     
-    mo.move(ms, lshape.cells, 1, 17, Move::Right);
-    //mo.move(ms, {{Cell{6}, Cell{6}}, {Cell{6}, Cell{6}}}, 3, 5, 1, 0);
     ms.print();
     return 0;
 }

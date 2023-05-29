@@ -23,6 +23,21 @@ public:
 private:
     CellType type;
 };
+class testShape{
+    std::vector<Cell> cell3 {18, Cell{Cell::Square}};
+    std::vector<Cell> cell4 {16, Cell{Cell::Square}};
+public:
+    std::vector<std::vector<Cell>> cells;
+    testShape() {
+        cells.push_back(cell3);
+        cells.push_back(cell4);
+        //cell.resize(0);
+        /*for(int i = 0; i < 16; i++){
+            cell.push_back(Cell{Cell::Square});
+        }
+        cells.push_back(cell);*/
+    }
+};
 
 class SquareShape {
 public:
@@ -30,7 +45,10 @@ public:
     SquareShape() {
         cells = {{Cell{Cell::Square}, Cell{Cell::Square}}, {Cell{Cell::Square}, Cell{Cell::Square}}};
     }
+    
 };
+
+
 
 class LShape{
 public:
@@ -39,9 +57,12 @@ public:
         cells = {
             {Cell{Cell::Square}},
             {Cell{Cell::Square}},
-            {Cell{Cell::Square},Cell{Cell::Square}}};
+            {Cell{Cell::Square},Cell{Cell::Square}}
+            
+        };
     }
 };
+
 
 class MainScene {
     const int CellNumberPerRow = 20;
@@ -54,6 +75,8 @@ public:
     void joinSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void cleanSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void print();
+    bool isRemove(int row);
+    void RemoveOneRow(int row);
 };
 
 class Move {
@@ -64,5 +87,6 @@ public:
     };
     void move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
 };
+
 
 #endif /* game_hpp */
