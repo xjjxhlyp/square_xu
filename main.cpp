@@ -37,7 +37,8 @@ std::vector<std::vector<Cell>> generateSquares(int a){
         case 6:
             squares = rzShape.cells;
             break;
-            
+        default:
+            std::cout << "unexpected shape" << a;
     }
     return squares;
 }
