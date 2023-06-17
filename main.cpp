@@ -6,22 +6,49 @@
 //
 
 #include "game.hpp"
+std::vector<std::vector<Cell>> generateSquares(int a){
+    std::vector<std::vector<Cell>> squares;
+    SquareShape sShape;
+    LineShape lShape;
+    TShape tShape;
+    LeftLShape llShape;
+    RightLShape rlShape;
+    LeftZShape lzShape;
+    RightZShape rzShape;
+    switch(a){
+        case 0:
+            squares = sShape.cells;
+            break;
+        case 1:
+            squares = lShape.cells;
+            break;
+        case 2:
+            squares = tShape.cells;
+            break;
+        case 3:
+            squares = llShape.cells;
+            break;
+        case 4:
+            squares = rlShape.cells;
+            break;
+        case 5:
+            squares = lzShape.cells;
+            break;
+        case 6:
+            squares = rzShape.cells;
+            break;
+            
+    }
+    return squares;
+}
 
 
 int main() {
-    // insert code here...
-
-    //printScene();
-    //screen(0, 1);
-    //show(3,4,0,1, "口");
-    
+    int a = 4;
+    std::vector<std::vector<Cell>> squares = generateSquares(a);
     MainScene ms;
-    testShape testshape;
-    ms.joinSquare(testshape.cells, 21, 1);
-    ms.print();
-    ms.RemoveOneRow(21);
     
-    
+    ms.joinSquare(squares, 21, 1);
     ms.print();
     return 0;
 }
