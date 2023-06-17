@@ -28,26 +28,83 @@ class SquareShape {
 public:
     std::vector<std::vector<Cell>> cells;
     SquareShape() {
-        cells = {{Cell{Cell::Square}, Cell{Cell::Square}}, {Cell{Cell::Square}, Cell{Cell::Square}}};
+        cells = {
+            {Cell{Cell::Square}, Cell{Cell::Square}},
+            {Cell{Cell::Square}, Cell{Cell::Square}}
+        };
     }
     
 };
 
-
-
-class LShape{
+class LineShape{
 public:
     std::vector<std::vector<Cell>> cells;
-    LShape() {
+    LineShape(){
         cells = {
-            {Cell{Cell::Square}},
-            {Cell{Cell::Square}},
-            {Cell{Cell::Square},Cell{Cell::Square}}
-            
+            {Cell{Cell::Square},Cell{Cell::Square},Cell{Cell::Square},Cell{Cell::Square}}
         };
     }
 };
 
+class TShape{
+public:
+    std::vector<std::vector<Cell>> cells;
+    TShape(){
+        cells = {
+            {Cell{Cell::Square}, Cell{Cell::Square},Cell{Cell::Square}},
+            {Cell{Cell::Space}, Cell{Cell::Square},Cell{Cell::Space}}
+        };
+    }
+};
+
+class LeftLShape{
+public:
+    std::vector<std::vector<Cell>> cells;
+    LeftLShape() {
+        cells = {
+            {Cell{Cell::Square},Cell{Cell::Space}},
+            {Cell{Cell::Square},Cell{Cell::Space}},
+            {Cell{Cell::Square},Cell{Cell::Square}}
+        };
+    }
+};
+
+class RightLShape{
+public:
+    std::vector<std::vector<Cell>> cells;
+    RightLShape() {
+        cells = {
+            {Cell{Cell::Space},Cell{Cell::Square}},
+            {Cell{Cell::Space},Cell{Cell::Square}},
+            {Cell{Cell::Square},Cell{Cell::Square}}
+        };
+    }
+};
+
+
+
+
+class LeftZShape{
+public:
+    std::vector<std::vector<Cell>> cells;
+    LeftZShape(){
+        cells = {
+            {Cell{Cell::Square}, Cell{Cell::Square},Cell{Cell::Space}},
+            {Cell{Cell::Space}, Cell{Cell::Square},Cell{Cell::Square}}
+        };
+    }
+};
+
+class RightZShape{
+public:
+    std::vector<std::vector<Cell>> cells;
+    RightZShape(){
+        cells = {
+            {Cell{Cell::Space}, Cell{Cell::Square},Cell{Cell::Square}},
+            {Cell{Cell::Square}, Cell{Cell::Square},Cell{Cell::Space}}
+        };
+    }
+};
 
 class MainScene {
     const int CellNumberPerRow = 20;
