@@ -7,6 +7,7 @@
 
 #include "game.hpp"
 std::vector<std::vector<Cell>> generateSquares(int a){
+    enum ShapeType{Square, Linshape, Tshape, LLshape, RLshape, LZshape, RZshape};
     std::vector<std::vector<Cell>> squares;
     SquareShape sShape;
     LineShape lShape;
@@ -16,36 +17,36 @@ std::vector<std::vector<Cell>> generateSquares(int a){
     LeftZShape lzShape;
     RightZShape rzShape;
     switch(a){
-        case 0:
+        case Square:
             squares = sShape.cells;
             break;
-        case 1:
+        case Linshape:
             squares = lShape.cells;
             break;
-        case 2:
+        case Tshape:
             squares = tShape.cells;
             break;
-        case 3:
+        case LLshape:
             squares = llShape.cells;
             break;
-        case 4:
+        case RLshape:
             squares = rlShape.cells;
             break;
-        case 5:
+        case LZshape:
             squares = lzShape.cells;
             break;
-        case 6:
+        case RZshape:
             squares = rzShape.cells;
             break;
         default:
-            std::cout << "unexpected shape" << a;
+            squares = sShape.cells;//要有默认值来处理其他情况，但是不能被用户感知到
     }
     return squares;
 }
 
 
 int main() {
-    int a = 4;
+    int a = 7;
     std::vector<std::vector<Cell>> squares = generateSquares(a);
     MainScene ms;
     
