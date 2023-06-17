@@ -6,8 +6,11 @@
 //
 
 #include "game.hpp"
+
+//枚举是全局的，是和类平级的，不能放在函数里边
+enum ShapeType{Square, Linshape, Tshape, LLshape, RLshape, LZshape, RZshape};
+
 std::vector<std::vector<Cell>> generateSquares(int a){
-    enum ShapeType{Square, Linshape, Tshape, LLshape, RLshape, LZshape, RZshape};
     std::vector<std::vector<Cell>> squares;
     SquareShape sShape;
     LineShape lShape;
@@ -44,9 +47,44 @@ std::vector<std::vector<Cell>> generateSquares(int a){
     return squares;
 }
 
+class UserCommand{
+    std::mutex mtx;
+public:
+    int cmd;
+    UserCommand(){
+        cmd = 0;
+    }
+    
+    void SetCmd(char ch){
+        mtx.lock();
+        cmd = ch;
+        mtx.unlock();
+    }
+    
+    int getCmd(){
+        int res;
+        mtx.lock();
+        res = cmd;
+        cmd = 0;
+        mtx.unlock();
+        return res;
+    }
+};
+
+UserCommand us;
+
+void reveiveInput(){
+    system("stty -icanon");//直接接收一个字符，不用回车结束
+    char ch;
+    while (true) {
+        ch = getchar();
+        us.SetCmd(ch);
+    }
+}
+
 
 int main() {
-    int a = 7;
+    int a = time(0) % 7;
     std::vector<std::vector<Cell>> squares = generateSquares(a);
     MainScene ms;
     
