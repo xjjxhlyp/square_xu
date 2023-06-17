@@ -24,6 +24,8 @@ private:
     CellType type;
 };
 
+//枚举也是一个类，是全局的，不能放在函数里边
+enum ShapeType{Square, Linshape, Tshape, LLshape, RLshape, LZshape, RZshape};
 class SquareShape {
 public:
     std::vector<std::vector<Cell>> cells;
@@ -123,7 +125,6 @@ private:
 };
 
 class Move {
-    
 public:
     enum Direction {
         Down, Left, Right

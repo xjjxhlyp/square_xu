@@ -6,8 +6,8 @@
 //
 
 #include "game.hpp"
+
 std::vector<std::vector<Cell>> generateSquares(int a){
-    enum ShapeType{Square, Linshape, Tshape, LLshape, RLshape, LZshape, RZshape};
     std::vector<std::vector<Cell>> squares;
     SquareShape sShape;
     LineShape lShape;
