@@ -7,21 +7,12 @@
 
 #include "game.hpp"
 
-
 int main() {
-    // insert code here...
-
-    //printScene();
-    //screen(0, 1);
-    //show(3,4,0,1, "口");
-    
+    ShapeType shapeType = Square;
+    std::shared_ptr<Shape> shapes = creatShape(shapeType);
     MainScene ms;
-    testShape testshape;
-    ms.joinSquare(testshape.cells, 21, 1);
-    ms.print();
-    ms.RemoveOneRow(21);
     
-    
+    ms.joinSquare(shapes->Cells(), 21, 1);
     ms.print();
     return 0;
 }

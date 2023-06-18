@@ -24,86 +24,86 @@ private:
     CellType type;
 };
 
-class SquareShape {
-public:
-    std::vector<std::vector<Cell>> cells;
-    SquareShape() {
-        cells = {
-            {Cell{Cell::Square}, Cell{Cell::Square}},
-            {Cell{Cell::Square}, Cell{Cell::Square}}
-        };
-    }
-    
+//枚举也是一个类，是全局的，不能放在函数里边
+enum ShapeType{
+    Square,
+    Lineshape,
+    Tshape,
+    LLshape,
+    RLshape,
+    LZshape,
+    RZshape
 };
+class Shape{
 
-class LineShape{
-public:
     std::vector<std::vector<Cell>> cells;
-    LineShape(){
-        cells = {
-            {Cell{Cell::Square},Cell{Cell::Square},Cell{Cell::Square},Cell{Cell::Square}}
-        };
+protected://只有子类可见
+    Shape(std::vector<std::vector<Cell>> squares){
+        cells = squares;
     }
-};
-
-class TShape{
 public:
-    std::vector<std::vector<Cell>> cells;
-    TShape(){
-        cells = {
-            {Cell{Cell::Square}, Cell{Cell::Square},Cell{Cell::Square}},
-            {Cell{Cell::Space}, Cell{Cell::Square},Cell{Cell::Space}}
-        };
+    std::vector<std::vector<Cell>> Cells(){
+        return cells;
     }
 };
 
-class LeftLShape{
+class SquareShape : public Shape{
 public:
-    std::vector<std::vector<Cell>> cells;
-    LeftLShape() {
-        cells = {
-            {Cell{Cell::Square},Cell{Cell::Space}},
-            {Cell{Cell::Square},Cell{Cell::Space}},
-            {Cell{Cell::Square},Cell{Cell::Square}}
-        };
+    SquareShape():Shape({
+        {Cell{Cell::Square}, Cell{Cell::Square}},
+        {Cell{Cell::Square}, Cell{Cell::Square}}
+    }){}
+
+};
+
+class LineShape : public Shape{
+public://子类的构造函数是public，外部才能创建对象
+    LineShape(): Shape({
+        {Cell{Cell::Square},Cell{Cell::Square},Cell{Cell::Square},Cell{Cell::Square}}
+    }){
     }
 };
 
-class RightLShape{
+class TShape : public Shape{
 public:
-    std::vector<std::vector<Cell>> cells;
-    RightLShape() {
-        cells = {
-            {Cell{Cell::Space},Cell{Cell::Square}},
-            {Cell{Cell::Space},Cell{Cell::Square}},
-            {Cell{Cell::Square},Cell{Cell::Square}}
-        };
-    }
+    TShape() : Shape({
+        {Cell{Cell::Square}, Cell{Cell::Square},Cell{Cell::Square}},
+        {Cell{Cell::Space}, Cell{Cell::Square},Cell{Cell::Space}}
+    }){}
 };
 
-
-
-
-class LeftZShape{
+class LeftLShape : public Shape{
 public:
-    std::vector<std::vector<Cell>> cells;
-    LeftZShape(){
-        cells = {
-            {Cell{Cell::Square}, Cell{Cell::Square},Cell{Cell::Space}},
-            {Cell{Cell::Space}, Cell{Cell::Square},Cell{Cell::Square}}
-        };
-    }
+    LeftLShape() : Shape({
+        {Cell{Cell::Square},Cell{Cell::Space}},
+        {Cell{Cell::Square},Cell{Cell::Space}},
+        {Cell{Cell::Square},Cell{Cell::Square}}
+    }){}
 };
 
-class RightZShape{
+class RightLShape : public Shape{
 public:
-    std::vector<std::vector<Cell>> cells;
-    RightZShape(){
-        cells = {
-            {Cell{Cell::Space}, Cell{Cell::Square},Cell{Cell::Square}},
-            {Cell{Cell::Square}, Cell{Cell::Square},Cell{Cell::Space}}
-        };
-    }
+    RightLShape():Shape({
+        {Cell{Cell::Space},Cell{Cell::Square}},
+        {Cell{Cell::Space},Cell{Cell::Square}},
+        {Cell{Cell::Square},Cell{Cell::Square}}
+    }) {}
+};
+
+class LeftZShape : public Shape{
+public:
+    LeftZShape() : Shape({
+        {Cell{Cell::Square}, Cell{Cell::Square},Cell{Cell::Space}},
+        {Cell{Cell::Space}, Cell{Cell::Square},Cell{Cell::Square}}
+    }){}
+};
+
+class RightZShape : public Shape{
+public:
+    RightZShape() : Shape({
+        {Cell{Cell::Space}, Cell{Cell::Square},Cell{Cell::Square}},
+        {Cell{Cell::Square}, Cell{Cell::Square},Cell{Cell::Space}}
+    }){}
 };
 
 class MainScene {
@@ -123,7 +123,6 @@ private:
 };
 
 class Move {
-    
 public:
     enum Direction {
         Down, Left, Right
@@ -131,5 +130,5 @@ public:
     void move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
 };
 
-
+std::shared_ptr<Shape> creatShape(ShapeType shapeType);
 #endif /* game_hpp */

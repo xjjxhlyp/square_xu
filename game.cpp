@@ -80,6 +80,7 @@ void MainScene::joinSquare(std::vector<std::vector<Cell>> squares, int x, int y)
     if(!canJoin((squares), x, y)) return;
     for (int i = 0; i < squares.size(); i++) {
         for (int j = 0; j < squares[i].size(); j++) {//squares每行元素个数不一定一样
+            if(squares[i][j] == Cell{Cell::Space}) continue;
             cells[x + i][y + j] = squares[i][j];
         }
     }
@@ -114,8 +115,6 @@ void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, in
         n = y + 1;
         break;
     }
-        
-        
     ms.cleanSquare(squares,x, y);
     if(ms.canJoin(squares, m, n)){
         ms.joinSquare(squares, m, n);
@@ -142,4 +141,24 @@ void MainScene::RemoveOneRow(int row){
     }
 }
 
-
+std::shared_ptr<Shape> creatShape(ShapeType shapeType){
+    switch(shapeType){
+        case Square:
+            return std::shared_ptr<SquareShape> (new SquareShape());
+        case Lineshape:
+            return std::shared_ptr<LineShape> (new LineShape());
+        case Tshape:
+            return std::shared_ptr<TShape> (new TShape());
+        case LLshape:
+            return std::shared_ptr<LeftLShape> (new LeftLShape());
+        case RLshape:
+            return std::shared_ptr<RightLShape> (new RightLShape());
+        case LZshape:
+            return std::shared_ptr<LeftZShape> (new LeftZShape());
+        case RZshape:
+            return std::shared_ptr<RightZShape> (new RightZShape());
+        default:
+            //要有默认值来处理其他情况，但是不能被用户感知到
+            return std::shared_ptr<SquareShape> (new SquareShape());
+    }
+}
