@@ -9,10 +9,10 @@
 
 int main() {
     ShapeType shapeType = Square;
-    Shape *shape = creatShape(shapeType);
+    std::shared_ptr<Shape> shapes = creatShape(shapeType);
     MainScene ms;
     
-    ms.joinSquare(shape->Cells(), 21, 1);
+    ms.joinSquare(shapes->Cells(), 21, 1);
     ms.print();
     return 0;
 }

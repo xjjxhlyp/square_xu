@@ -141,23 +141,24 @@ void MainScene::RemoveOneRow(int row){
     }
 }
 
-Shape* creatShape(ShapeType shapeType){
+std::shared_ptr<Shape> creatShape(ShapeType shapeType){
     switch(shapeType){
         case Square:
-            return new SquareShape();
-        case Linshape:
-            return new LineShape();
+            return std::shared_ptr<SquareShape> (new SquareShape());
+        case Lineshape:
+            return std::shared_ptr<LineShape> (new LineShape());
         case Tshape:
-            return new TShape();
+            return std::shared_ptr<TShape> (new TShape());
         case LLshape:
-            return new LeftLShape();
+            return std::shared_ptr<LeftLShape> (new LeftLShape());
         case RLshape:
-            return new RightLShape();
+            return std::shared_ptr<RightLShape> (new RightLShape());
         case LZshape:
-            return new LeftZShape();
+            return std::shared_ptr<LeftZShape> (new LeftZShape());
         case RZshape:
-            return new RightZShape();
+            return std::shared_ptr<RightZShape> (new RightZShape());
         default:
-            return new LineShape();//要有默认值来处理其他情况，但是不能被用户感知到
+            //要有默认值来处理其他情况，但是不能被用户感知到
+            return std::shared_ptr<SquareShape> (new SquareShape());
     }
 }

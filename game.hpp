@@ -27,7 +27,7 @@ private:
 //枚举也是一个类，是全局的，不能放在函数里边
 enum ShapeType{
     Square,
-    Linshape,
+    Lineshape,
     Tshape,
     LLshape,
     RLshape,
@@ -129,5 +129,6 @@ public:
     };
     void move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
 };
-Shape* creatShape(ShapeType shapeType);
+
+std::shared_ptr<Shape> creatShape(ShapeType shapeType);
 #endif /* game_hpp */
