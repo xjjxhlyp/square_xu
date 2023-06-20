@@ -135,17 +135,15 @@ std::shared_ptr<Shape> creatShape(ShapeType shapeType);
 class UserCommand{
     std::mutex mtx;
     int cmd;
-    
+    char getchar_no_output();
 public:
     UserCommand(){cmd = 0;}
-    void SetCmd(char ch);
+    void setCmd(char ch);
     int getCmd();
+public:
+    void receiveCommand();
 };
 
-class ReceiveInput{
-public:
-    char getchar_no_output();
-    void receiveInput();
-};
+
 
 #endif /* game_hpp */

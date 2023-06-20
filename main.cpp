@@ -25,9 +25,9 @@ int main() {
     ms.print();
     Move mo;
     */
-    ReceiveInput re;
+    UserCommand uc;
     //  传入顺序：线程函数，实例化类指针，函数参数
-    std::thread th(&ReceiveInput::receiveInput, &re);
+    std::thread th(&UserCommand::receiveCommand, &uc);
     th.join();
     return 0;
 }

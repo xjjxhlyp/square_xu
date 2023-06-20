@@ -162,7 +162,7 @@ std::shared_ptr<Shape> creatShape(ShapeType shapeType){
             return std::shared_ptr<SquareShape> (new SquareShape());
     }
 }
-void UserCommand::SetCmd(char ch){
+void UserCommand::setCmd(char ch){
     mtx.lock();
     cmd = ch;
     mtx.unlock();
@@ -177,7 +177,7 @@ int UserCommand::getCmd(){
     return res;
 }
 
-char ReceiveInput::getchar_no_output(){
+char UserCommand::getchar_no_output(){
     struct termios org_opts{};
     struct termios new_opts{};
     tcgetattr(1,&org_opts);
@@ -189,13 +189,12 @@ char ReceiveInput::getchar_no_output(){
     return ch;
 }
 
-UserCommand us;
-void ReceiveInput::receiveInput(){
+void UserCommand::receiveCommand(){
     system("stty -icanon");//直接接收一个字符，不用回车结束
     char ch;
     while (true) {
         ch = getchar_no_output();
-        us.SetCmd(ch);
+        setCmd(ch);
     }
 }
 
