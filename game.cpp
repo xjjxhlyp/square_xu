@@ -162,3 +162,40 @@ std::shared_ptr<Shape> creatShape(ShapeType shapeType){
             return std::shared_ptr<SquareShape> (new SquareShape());
     }
 }
+void UserCommand::SetCmd(char ch){
+    mtx.lock();
+    cmd = ch;
+    mtx.unlock();
+}
+
+int UserCommand::getCmd(){
+    int res;
+    mtx.lock();
+    res = cmd;
+    cmd = 0;
+    mtx.unlock();
+    return res;
+}
+
+char ReceiveInput::getchar_no_output(){
+    struct termios org_opts{};
+    struct termios new_opts{};
+    tcgetattr(1,&org_opts);
+    memcpy(&new_opts, &org_opts, sizeof(org_opts));
+    new_opts.c_lflag &=~(ECHO | ECHOE );
+    tcsetattr(1, TCSANOW, &new_opts);
+    char ch = getchar();
+    tcsetattr(1,TCSANOW, &org_opts);
+    return ch;
+}
+
+UserCommand us;
+void ReceiveInput::receiveInput(){
+    system("stty -icanon");//直接接收一个字符，不用回车结束
+    char ch;
+    while (true) {
+        ch = getchar_no_output();
+        us.SetCmd(ch);
+    }
+}
+

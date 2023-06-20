@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <vector>
 #include <iostream>
-
+#include <termios.h>
 
 class Cell {
 public:
@@ -131,4 +131,21 @@ public:
 };
 
 std::shared_ptr<Shape> creatShape(ShapeType shapeType);
+
+class UserCommand{
+    std::mutex mtx;
+    int cmd;
+    
+public:
+    UserCommand(){cmd = 0;}
+    void SetCmd(char ch);
+    int getCmd();
+};
+
+class ReceiveInput{
+public:
+    char getchar_no_output();
+    void receiveInput();
+};
+
 #endif /* game_hpp */
