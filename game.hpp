@@ -12,7 +12,9 @@
 #include <vector>
 #include <iostream>
 #include <termios.h>
-
+#include <thread>
+#include <unistd.h>
+#include <string>
 class Cell {
 public:
     enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
@@ -44,21 +46,6 @@ public:
     std::vector<std::vector<Cell>> Cells(){
         return cells;
     }
-    std::vector<std::vector<Cell>> rotate(){
-        std::vector<std::vector<Cell>> res;
-        std::vector<Cell> temp;
-        for(int j = 0; j < cells[0].size(); j++){
-            for(int i = 0; i < cells.size(); i++){
-                temp.push_back(cells[i][j]);
-            }
-            res.push_back(temp);
-        }
-        int i = 0, j = res.size() - 1;
-        while(i < j){
-            swap(res[i++], res[j--]);
-        }
-        return res;
-    }
 };
 
 
@@ -68,7 +55,6 @@ public:
         {Cell{Cell::Square}, Cell{Cell::Square}},
         {Cell{Cell::Square}, Cell{Cell::Square}}
     }){}
-
 };
 
 class LineShape : public Shape{
@@ -152,12 +138,23 @@ private:
     
 private:
     char getchar_no_output();
-    void setCmd(char ch);
-    
+    //在类内使用线程，要用static修饰改函数
+   void receiveCommand(){
+        system("stty -icanon");//直接接收一个字符，不用回车结束
+        char ch;
+        while(true){
+           ch = getchar_no_output();
+           mtx.lock();
+           cmd = ch;
+           mtx.unlock();
+       }
+    }
 public:
-    UserCommand(){cmd = 0;}
+    UserCommand(){
+        cmd = 0;
+        std::thread th(&UserCommand::receiveCommand, this);
+    }
     int getCmd();
-    void receiveCommand();
 };
 
 #endif /* game_hpp */
