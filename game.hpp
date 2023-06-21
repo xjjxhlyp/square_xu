@@ -35,7 +35,6 @@ enum ShapeType{
     RZshape
 };
 class Shape{
-
     std::vector<std::vector<Cell>> cells;
 protected://只有子类可见
     Shape(std::vector<std::vector<Cell>> squares){
@@ -45,7 +44,23 @@ public:
     std::vector<std::vector<Cell>> Cells(){
         return cells;
     }
+    std::vector<std::vector<Cell>> rotate(){
+        std::vector<std::vector<Cell>> res;
+        std::vector<Cell> temp;
+        for(int j = 0; j < cells[0].size(); j++){
+            for(int i = 0; i < cells.size(); i++){
+                temp.push_back(cells[i][j]);
+            }
+            res.push_back(temp);
+        }
+        int i = 0, j = res.size() - 1;
+        while(i < j){
+            swap(res[i++], res[j--]);
+        }
+        return res;
+    }
 };
+
 
 class SquareShape : public Shape{
 public:
@@ -107,11 +122,10 @@ public:
 };
 
 class MainScene {
-    const int CellNumberPerRow = 20;
-    const int CellNumberPerCol = 30;
+    const int CellNumberPerRow = 12;
+    const int CellNumberPerCol = 22;
 public:
     std::vector<std::vector<Cell>> cells;
-    
     MainScene();
     bool canJoin(std::vector<std::vector<Cell>> squares, int x, int y);
     void joinSquare(std::vector<std::vector<Cell>> squares, int x, int y);
@@ -131,19 +145,19 @@ public:
 };
 
 std::shared_ptr<Shape> creatShape(ShapeType shapeType);
-
 class UserCommand{
+private:
     std::mutex mtx;
     int cmd;
+    
+private:
     char getchar_no_output();
+    void setCmd(char ch);
+    
 public:
     UserCommand(){cmd = 0;}
-    void setCmd(char ch);
     int getCmd();
-public:
     void receiveCommand();
 };
-
-
 
 #endif /* game_hpp */
