@@ -131,6 +131,7 @@ public:
 };
 
 std::shared_ptr<Shape> creatShape(ShapeType shapeType);
+
 class UserCommand{
 private:
     std::mutex mtx;
@@ -153,6 +154,7 @@ public:
     UserCommand(){
         cmd = 0;
         std::thread th(&UserCommand::receiveCommand, this);
+        th.detach();
     }
     int getCmd();
 };

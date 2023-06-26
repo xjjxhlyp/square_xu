@@ -7,7 +7,7 @@
 
 #include "game.hpp"
 #include <thread>
-
+#include <unistd.h>//包含sleep()的头文件
 
 using namespace std;
 int main() {
@@ -23,14 +23,11 @@ int main() {
     UserCommand uc;
     while(true){
         int cmd =  uc.getCmd();
-        std::cout << cmd << std::endl;
+        if(cmd != 0){
+            std::cout << cmd << std::endl;
+            sleep(1);
+        }
     }
-    
-    
-    
-    
-    
-    
     return 0;
 }
 
