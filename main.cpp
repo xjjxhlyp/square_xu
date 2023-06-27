@@ -8,26 +8,21 @@
 #include "game.hpp"
 #include <thread>
 #include <unistd.h>//包含sleep()的头文件
-
+void print(std::vector<std::vector<Cell>> res){
+    for(int i = 0; i < res.size(); i++){
+        for(int j = 0; j < res[0].size(); j++){
+            std::cout << res[i][j] ;
+        }
+        std::cout << std::endl;
+    }
+}
 using namespace std;
 int main() {
-    /*ShapeType shapeType = Square;
+    ShapeType shapeType = LZshape;
     std::shared_ptr<Shape> shapes = creatShape(shapeType);
-    MainScene ms;
-    int row = 1, col = 4;
-    ms.joinSquare(shapes->Cells(), row, col);
-    ms.print();
-    Move mo;
-    //std::printf("\033[23A");*/
-    
-    UserCommand uc;
-    while(true){
-        int cmd =  uc.getCmd();
-        if(cmd != 0){
-            std::cout << cmd << std::endl;
-            sleep(1);
-        }
-    }
+    print(shapes->Cells());
+    std::vector<std::vector<Cell>> res = shapes->rotate(shapes->Cells());
+    print(res);
     return 0;
 }
 
