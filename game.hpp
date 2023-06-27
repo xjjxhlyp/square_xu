@@ -11,8 +11,10 @@
 #include <stdio.h>
 #include <vector>
 #include <iostream>
-
-
+#include <termios.h>
+#include <thread>
+#include <unistd.h>
+#include <string>
 class Cell {
 public:
     enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
@@ -35,7 +37,6 @@ enum ShapeType{
     RZshape
 };
 class Shape{
-
     std::vector<std::vector<Cell>> cells;
 protected://只有子类可见
     Shape(std::vector<std::vector<Cell>> squares){
@@ -47,13 +48,13 @@ public:
     }
 };
 
+
 class SquareShape : public Shape{
 public:
     SquareShape():Shape({
         {Cell{Cell::Square}, Cell{Cell::Square}},
         {Cell{Cell::Square}, Cell{Cell::Square}}
     }){}
-
 };
 
 class LineShape : public Shape{
@@ -107,11 +108,10 @@ public:
 };
 
 class MainScene {
-    const int CellNumberPerRow = 20;
-    const int CellNumberPerCol = 30;
+    const int CellNumberPerRow = 12;
+    const int CellNumberPerCol = 22;
 public:
     std::vector<std::vector<Cell>> cells;
-    
     MainScene();
     bool canJoin(std::vector<std::vector<Cell>> squares, int x, int y);
     void joinSquare(std::vector<std::vector<Cell>> squares, int x, int y);
@@ -131,4 +131,32 @@ public:
 };
 
 std::shared_ptr<Shape> creatShape(ShapeType shapeType);
+
+class UserCommand{
+private:
+    std::mutex mtx;
+    int cmd;
+    
+private:
+    char getchar_no_output();
+    //在类内使用线程，要用static修饰改函数
+   void receiveCommand(){
+        system("stty -icanon");//直接接收一个字符，不用回车结束
+        char ch;
+        while(true){
+           ch = getchar_no_output();
+           mtx.lock();
+           cmd = ch;
+           mtx.unlock();
+       }
+    }
+public:
+    UserCommand(){
+        cmd = 0;
+        std::thread th(&UserCommand::receiveCommand, this);
+        th.detach();
+    }
+    int getCmd();
+};
+
 #endif /* game_hpp */

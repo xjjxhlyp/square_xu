@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <unistd.h>//包含sleep()的头文件
 #include <vector>
-#include <algorithm>
+
 
 std::ostream& operator<<(std::ostream& out, Cell& cell) {
     if (cell.type == Cell::LeftBoundary) {
@@ -162,3 +162,25 @@ std::shared_ptr<Shape> creatShape(ShapeType shapeType){
             return std::shared_ptr<SquareShape> (new SquareShape());
     }
 }
+
+char UserCommand:: getchar_no_output(){
+    struct termios org_opts{};
+    struct termios new_opts{};
+    tcgetattr(1,&org_opts);
+    memcpy(&new_opts, &org_opts, sizeof(org_opts));
+    new_opts.c_lflag &=~(ECHO | ECHOE );
+    tcsetattr(1, TCSANOW, &new_opts);
+    char ch = getchar();
+    tcsetattr(1,TCSANOW, &org_opts);
+    return ch;
+}
+
+int UserCommand::getCmd(){
+    int res;
+    mtx.lock();
+    res = cmd;
+    cmd = 0;
+    mtx.unlock();
+    return res;
+}
+
