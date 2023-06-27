@@ -21,8 +21,8 @@ int main() {
     ShapeType shapeType = LZshape;
     std::shared_ptr<Shape> shapes = creatShape(shapeType);
     print(shapes->Cells());
-    std::vector<std::vector<Cell>> res = shapes->rotate(shapes->Cells());
-    print(res);
+    shapes->rotate();
+    print(shapes->Cells());
     return 0;
 }
 

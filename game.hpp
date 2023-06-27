@@ -43,10 +43,11 @@ protected://只有子类可见
         cells = squares;
     }
 public:
+    void rotate();
     std::vector<std::vector<Cell>> Cells(){
         return cells;
     }
-    std::vector<std::vector<Cell>> rotate(std::vector<std::vector<Cell>> shapes);
+    
 };
 
 

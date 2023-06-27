@@ -163,12 +163,12 @@ std::shared_ptr<Shape> creatShape(ShapeType shapeType){
     }
 }
 
-std::vector<std::vector<Cell>> Shape::rotate(std::vector<std::vector<Cell>> shapes){
+void Shape::rotate(){
     std::vector<std::vector<Cell>> res;
-    for(int j = 0; j < shapes[0].size(); j++){
+    for(int j = 0; j < cells[0].size(); j++){
         std::vector<Cell> temp;
-        for(int i = 0; i < shapes.size(); i++){
-            temp.push_back(shapes[i][j]);
+        for(int i = 0; i < cells.size(); i++){
+            temp.push_back(cells[i][j]);
         }
         res.push_back(temp);
     }
@@ -176,7 +176,7 @@ std::vector<std::vector<Cell>> Shape::rotate(std::vector<std::vector<Cell>> shap
     while(i < j){
         swap(res[i++],res[j--]);
     }
-    return res;
+    cells = res;
 }
 
 char UserCommand::getchar_no_output(){
