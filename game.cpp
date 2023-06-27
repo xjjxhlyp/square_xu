@@ -163,7 +163,23 @@ std::shared_ptr<Shape> creatShape(ShapeType shapeType){
     }
 }
 
-char UserCommand:: getchar_no_output(){
+void Shape::rotate(){
+    std::vector<std::vector<Cell>> res;
+    for(int j = 0; j < cells[0].size(); j++){
+        std::vector<Cell> temp;
+        for(int i = 0; i < cells.size(); i++){
+            temp.push_back(cells[i][j]);
+        }
+        res.push_back(temp);
+    }
+    int i = 0, j = res.size()-1;
+    while(i < j){
+        swap(res[i++],res[j--]);
+    }
+    cells = res;
+}
+
+char UserCommand::getchar_no_output(){
     struct termios org_opts{};
     struct termios new_opts{};
     tcgetattr(1,&org_opts);
@@ -175,6 +191,16 @@ char UserCommand:: getchar_no_output(){
     return ch;
 }
 
+void UserCommand::receiveCommand(){
+     system("stty -icanon");//直接接收一个字符，不用回车结束
+     char ch;
+     while(true){
+        ch = getchar_no_output();
+        mtx.lock();
+        cmd = ch;
+        mtx.unlock();
+    }
+ }
 int UserCommand::getCmd(){
     int res;
     mtx.lock();

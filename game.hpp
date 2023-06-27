@@ -43,9 +43,11 @@ protected://只有子类可见
         cells = squares;
     }
 public:
+    void rotate();
     std::vector<std::vector<Cell>> Cells(){
         return cells;
     }
+    
 };
 
 
@@ -140,16 +142,7 @@ private:
 private:
     char getchar_no_output();
     //在类内使用线程，要用static修饰改函数
-   void receiveCommand(){
-        system("stty -icanon");//直接接收一个字符，不用回车结束
-        char ch;
-        while(true){
-           ch = getchar_no_output();
-           mtx.lock();
-           cmd = ch;
-           mtx.unlock();
-       }
-    }
+    void receiveCommand();
 public:
     UserCommand(){
         cmd = 0;
