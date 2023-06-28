@@ -101,7 +101,12 @@ void MainScene::print() {
         std::cout << std::endl;
     }
 }
-
+void MainScene::printScreen(){
+    print();
+    std::cout << std::endl;
+    usleep(500000);
+    std::printf("\033[23A");
+}
 void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di) {
     int m = x, n = y;
     switch(di) {
@@ -118,9 +123,11 @@ void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, in
     ms.cleanSquare(squares,x, y);
     if(ms.canJoin(squares, m, n)){
         ms.joinSquare(squares, m, n);
+        moved = true;
     }
     else{
         ms.joinSquare(squares, x, y);
+        moved = false;
     }
 }
 

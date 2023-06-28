@@ -119,17 +119,23 @@ public:
     void joinSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void cleanSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void print();
+    void printScreen();
 private:
     bool canRemove(int row);
     void RemoveOneRow(int row);
 };
 
 class Move {
+    bool moved;
 public:
     enum Direction {
         Down, Left, Right
     };
     void move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
+    bool isMove(){
+        if(moved) return true;
+        return false;
+    }
 };
 
 std::shared_ptr<Shape> creatShape(ShapeType shapeType);
