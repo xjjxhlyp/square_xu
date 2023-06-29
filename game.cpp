@@ -105,7 +105,7 @@ void MainScene::printScreen(){
     print();
     std::cout << std::endl;
     usleep(500000);
-    std::printf("\033[23A");
+    std::printf("\033[23A");//光标移动到屏幕开头
 }
 bool Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di) {
     int m = x, n = y;
@@ -148,23 +148,21 @@ void MainScene::RemoveOneRow(int row){
     }
 }
 
-std::shared_ptr<Shape> creatShape(){
-    int randomIndex = time(0) % ShapeType::end;// 将随机索引转换为枚举值
-    ShapeType randomShape = static_cast<ShapeType>(randomIndex);// 输出随机选择的枚举值
+std::shared_ptr<Shape> createShape(ShapeType randomShape){
     switch(randomShape){
         case Square:
             return std::shared_ptr<SquareShape> (new SquareShape());
-        case Lineshape:
+        case YiShape:
             return std::shared_ptr<LineShape> (new LineShape());
-        case Tshape:
+        case TtShape:
             return std::shared_ptr<TShape> (new TShape());
-        case LLshape:
+        case LLShape:
             return std::shared_ptr<LeftLShape> (new LeftLShape());
-        case RLshape:
+        case RLShape:
             return std::shared_ptr<RightLShape> (new RightLShape());
-        case LZshape:
+        case LZShape:
             return std::shared_ptr<LeftZShape> (new LeftZShape());
-        case RZshape:
+        case RZShape:
             return std::shared_ptr<RightZShape> (new RightZShape());
         default:
             //要有默认值来处理其他情况，但是不能被用户感知到
@@ -219,8 +217,9 @@ int UserCommand::getCmd(){
     return res;
 }
 
-void Game::reponseInput(){
-    std::shared_ptr<Shape> shapes = creatShape();
+void Game::run(){
+    ShapeType rand = randShape();
+    std::shared_ptr<Shape> shapes = createShape(rand);
     MainScene ms;
     int row = 1, col = 4;
     ms.joinSquare(shapes->Cells(), row, col);
@@ -232,19 +231,19 @@ void Game::reponseInput(){
     while(!stop){
         int cmd =  uc.getCmd();
         switch(cmd){
-            case 66:
+            case ToDown:
                 if(mo.move(ms, shapes->Cells(), row, col,Move::Down)){
                     row++;
                 }
                 ms.printScreen();
                 break;
-            case 68:
+            case ToLeft:
                 if(mo.move(ms, shapes->Cells(), row, col,Move::Left)){
                     col--;
                 }
                 ms.printScreen();
                 break;
-            case 67:
+            case ToRight:
                 if(mo.move(ms, shapes->Cells(), row, col,Move::Right)){
                     col++;
                 }

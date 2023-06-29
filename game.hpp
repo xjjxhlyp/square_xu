@@ -32,13 +32,13 @@ private:
 //枚举也是一个类，是全局的，不能放在函数里边
 enum ShapeType{
     Square,
-    Lineshape,
-    Tshape,
-    LLshape,
-    RLshape,
-    LZshape,
-    RZshape,
-    end
+    YiShape,
+    TtShape,
+    LLShape,
+    RLShape,
+    LZShape,
+    RZShape,
+    ShapeTotal
 };
 class Shape{
     std::vector<std::vector<Cell>> cells;
@@ -137,7 +137,7 @@ public:
     bool move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
 };
 
-std::shared_ptr<Shape> creatShape();
+std::shared_ptr<Shape> createShape();
 
 class UserCommand{
 private:
@@ -157,9 +157,22 @@ public:
     int getCmd();
 };
 
+enum MoveType{
+    ToDown = 66,
+    ToLeft = 68,
+    ToRight = 67,
+    ToRotate = 65,
+    ToBottom = 32
+};
+
 class Game{
 public:
-    void reponseInput();
+    ShapeType randShape(){
+        int randomIndex = time(0) % ShapeType::ShapeTotal;// 将随机索引转换为枚举值
+        ShapeType randomShape = static_cast<ShapeType>(randomIndex);// 输出随机选择的枚举值
+        return randomShape;
+    }
+    void run();
 };
 
 #endif /* game_hpp */

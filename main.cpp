@@ -17,7 +17,7 @@ void sum(int &row){
 using namespace std;
 int main() {
     Game game;
-    game.reponseInput();
+    game.run();
     return 0;
 }
 
