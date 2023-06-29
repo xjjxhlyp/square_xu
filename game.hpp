@@ -15,6 +15,9 @@
 #include <thread>
 #include <unistd.h>
 #include <string>
+#include <cstdlib>
+#include <ctime>
+
 class Cell {
 public:
     enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
@@ -34,7 +37,8 @@ enum ShapeType{
     LLshape,
     RLshape,
     LZshape,
-    RZshape
+    RZshape,
+    end
 };
 class Shape{
     std::vector<std::vector<Cell>> cells;
@@ -126,19 +130,14 @@ private:
 };
 
 class Move {
-    bool moved;
 public:
     enum Direction {
         Down, Left, Right
     };
-    void move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
-    bool isMove(){
-        if(moved) return true;
-        return false;
-    }
+    bool move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
 };
 
-std::shared_ptr<Shape> creatShape(ShapeType shapeType);
+std::shared_ptr<Shape> creatShape();
 
 class UserCommand{
 private:
@@ -156,6 +155,11 @@ public:
         th.detach();
     }
     int getCmd();
+};
+
+class Game{
+public:
+    void reponseInput();
 };
 
 #endif /* game_hpp */

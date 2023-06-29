@@ -107,7 +107,7 @@ void MainScene::printScreen(){
     usleep(500000);
     std::printf("\033[23A");
 }
-void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di) {
+bool Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di) {
     int m = x, n = y;
     switch(di) {
     case Down:
@@ -123,11 +123,11 @@ void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, in
     ms.cleanSquare(squares,x, y);
     if(ms.canJoin(squares, m, n)){
         ms.joinSquare(squares, m, n);
-        moved = true;
+        return true;
     }
     else{
         ms.joinSquare(squares, x, y);
-        moved = false;
+        return false;
     }
 }
 
@@ -148,8 +148,10 @@ void MainScene::RemoveOneRow(int row){
     }
 }
 
-std::shared_ptr<Shape> creatShape(ShapeType shapeType){
-    switch(shapeType){
+std::shared_ptr<Shape> creatShape(){
+    int randomIndex = time(0) % ShapeType::end;// 将随机索引转换为枚举值
+    ShapeType randomShape = static_cast<ShapeType>(randomIndex);// 输出随机选择的枚举值
+    switch(randomShape){
         case Square:
             return std::shared_ptr<SquareShape> (new SquareShape());
         case Lineshape:
@@ -217,3 +219,46 @@ int UserCommand::getCmd(){
     return res;
 }
 
+void Game::reponseInput(){
+    std::shared_ptr<Shape> shapes = creatShape();
+    MainScene ms;
+    int row = 1, col = 4;
+    ms.joinSquare(shapes->Cells(), row, col);
+    ms.printScreen();
+    Game game;
+    Move mo;
+    UserCommand uc;
+    bool stop = false;
+    while(!stop){
+        int cmd =  uc.getCmd();
+        switch(cmd){
+            case 66:
+                if(mo.move(ms, shapes->Cells(), row, col,Move::Down)){
+                    row++;
+                }
+                ms.printScreen();
+                break;
+            case 68:
+                if(mo.move(ms, shapes->Cells(), row, col,Move::Left)){
+                    col--;
+                }
+                ms.printScreen();
+                break;
+            case 67:
+                if(mo.move(ms, shapes->Cells(), row, col,Move::Right)){
+                    col++;
+                }
+                ms.printScreen();
+                break;
+        }
+        if(mo.move(ms, shapes->Cells(), row, col,Move::Down)){
+            row++;
+            ms.printScreen();
+        }
+        else{
+            stop = true;
+            ms.print();
+        }
+       
+    }
+}
