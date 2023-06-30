@@ -101,12 +101,19 @@ void MainScene::print() {
         std::cout << std::endl;
     }
 }
-void MainScene::printScreen(){
+void MainScene::printScreen(EvenType et){
     print();
     std::cout << std::endl;
-    usleep(500000);
-    std::printf("\033[23A");//光标移动到屏幕开头
+    switch(et){
+        case UserInput:
+            break;
+        case TimedFall:
+            usleep(500000);
+            break;
+    }
+    std::printf("\033[23A");//光标向上移动23行，移动到屏幕开头
 }
+
 bool Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di) {
     int m = x, n = y;
     switch(di) {
@@ -198,61 +205,63 @@ char UserCommand::getchar_no_output(){
     return ch;
 }
 
-void UserCommand::receiveCommand(){
-     system("stty -icanon");//直接接收一个字符，不用回车结束
+void UserCommand::receiveCmd(){
+     system("stty -icanon");
      char ch;
      while(true){
         ch = getchar_no_output();
         mtx.lock();
-        cmd = ch;
+        int cmd = ch;
+        userComannds.push(cmd);
         mtx.unlock();
     }
  }
+
 int UserCommand::getCmd(){
+    if(userComannds.empty()) return 0;
     int res;
     mtx.lock();
-    res = cmd;
-    cmd = 0;
+    res = userComannds.front();
+    userComannds.pop();
     mtx.unlock();
     return res;
 }
 
+void UserCommand::reponseCmd(MainScene&ms, Move mo, std::shared_ptr<Shape> shapes, int &row, int &col){
+    while(!userComannds.empty()){
+        int cmd = getCmd();
+        UserCommandType ucType = static_cast<UserCommandType>(cmd);
+        switch(ucType){
+            case ToDown:
+                if(mo.move(ms, shapes->Cells(), row, col,Move::Down))row++;
+                ms.printScreen(MainScene::UserInput);
+                break;
+            case ToLeft:
+                if(mo.move(ms, shapes->Cells(), row, col,Move::Left))col--;
+                ms.printScreen(MainScene::UserInput);
+                break;
+            case ToRight:
+                if(mo.move(ms, shapes->Cells(), row, col,Move::Right))col++;
+                ms.printScreen(MainScene::UserInput);
+                break;
+        }
+    }
+}
 void Game::run(){
-    ShapeType rand = randShape();
+    ShapeType rand = randomShape();
     std::shared_ptr<Shape> shapes = createShape(rand);
     MainScene ms;
     int row = 1, col = 4;
     ms.joinSquare(shapes->Cells(), row, col);
-    ms.printScreen();
-    Game game;
+    ms.printScreen(MainScene::TimedFall);
     Move mo;
     UserCommand uc;
     bool stop = false;
     while(!stop){
-        int cmd =  uc.getCmd();
-        switch(cmd){
-            case ToDown:
-                if(mo.move(ms, shapes->Cells(), row, col,Move::Down)){
-                    row++;
-                }
-                ms.printScreen();
-                break;
-            case ToLeft:
-                if(mo.move(ms, shapes->Cells(), row, col,Move::Left)){
-                    col--;
-                }
-                ms.printScreen();
-                break;
-            case ToRight:
-                if(mo.move(ms, shapes->Cells(), row, col,Move::Right)){
-                    col++;
-                }
-                ms.printScreen();
-                break;
-        }
+        uc.reponseCmd(ms, mo, shapes, row, col);
         if(mo.move(ms, shapes->Cells(), row, col,Move::Down)){
             row++;
-            ms.printScreen();
+            ms.printScreen(MainScene::TimedFall);
         }
         else{
             stop = true;

@@ -17,6 +17,7 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
+#include <queue>
 
 class Cell {
 public:
@@ -47,6 +48,7 @@ protected://只有子类可见
         cells = squares;
     }
 public:
+    
     void rotate();
     std::vector<std::vector<Cell>> Cells(){
         return cells;
@@ -117,13 +119,20 @@ class MainScene {
     const int CellNumberPerRow = 12;
     const int CellNumberPerCol = 22;
 public:
+    enum EvenType{
+        UserInput,
+        TimedFall
+    };
+    
+public:
     std::vector<std::vector<Cell>> cells;
+public:
     MainScene();
     bool canJoin(std::vector<std::vector<Cell>> squares, int x, int y);
     void joinSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void cleanSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void print();
-    void printScreen();
+    void printScreen(EvenType et);
 private:
     bool canRemove(int row);
     void RemoveOneRow(int row);
@@ -139,25 +148,7 @@ public:
 
 std::shared_ptr<Shape> createShape();
 
-class UserCommand{
-private:
-    std::mutex mtx;
-    int cmd;
-    
-private:
-    char getchar_no_output();
-    //在类内使用线程，要用static修饰改函数
-    void receiveCommand();
-public:
-    UserCommand(){
-        cmd = 0;
-        std::thread th(&UserCommand::receiveCommand, this);
-        th.detach();
-    }
-    int getCmd();
-};
-
-enum MoveType{
+enum UserCommandType{
     ToDown = 66,
     ToLeft = 68,
     ToRight = 67,
@@ -165,13 +156,29 @@ enum MoveType{
     ToBottom = 32
 };
 
-class Game{
+class UserCommand{
+private:
+    std::mutex mtx;
+    std::queue<int> userComannds;
+private:
+    char getchar_no_output();
+    void receiveCmd();
 public:
-    ShapeType randShape(){
-        int randomIndex = time(0) % ShapeType::ShapeTotal;// 将随机索引转换为枚举值
-        ShapeType randomShape = static_cast<ShapeType>(randomIndex);// 输出随机选择的枚举值
-        return randomShape;
+    UserCommand(){
+        std::thread th(&UserCommand::receiveCmd, this);
+        th.detach();
     }
+    int getCmd();
+    void reponseCmd(MainScene&ms, Move mo, std::shared_ptr<Shape> shapes, int &row, int &col);
+};
+
+
+
+class Game{
+    ShapeType randomShape(){
+        return static_cast<ShapeType>(time(0) % ShapeType::ShapeTotal);// 输出随机选择的枚举值
+    }
+public:
     void run();
 };
 

@@ -9,11 +9,6 @@
 #include <thread>
 #include <unistd.h>//包含sleep()的头文件
 
-void sum(int &row){
-    row++;
-    
-}
-
 using namespace std;
 int main() {
     Game game;
