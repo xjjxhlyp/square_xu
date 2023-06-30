@@ -101,8 +101,20 @@ void MainScene::print() {
         std::cout << std::endl;
     }
 }
+void MainScene::printScreen(EvenType et){
+    print();
+    std::cout << std::endl;
+    switch(et){
+        case UserInput:
+            break;
+        case TimedFall:
+            usleep(500000);
+            break;
+    }
+    std::printf("\033[23A");//光标向上移动23行，移动到屏幕开头
+}
 
-void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di) {
+bool Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di) {
     int m = x, n = y;
     switch(di) {
     case Down:
@@ -118,9 +130,11 @@ void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, in
     ms.cleanSquare(squares,x, y);
     if(ms.canJoin(squares, m, n)){
         ms.joinSquare(squares, m, n);
+        return true;
     }
     else{
         ms.joinSquare(squares, x, y);
+        return false;
     }
 }
 
@@ -141,21 +155,21 @@ void MainScene::RemoveOneRow(int row){
     }
 }
 
-std::shared_ptr<Shape> creatShape(ShapeType shapeType){
-    switch(shapeType){
+std::shared_ptr<Shape> createShape(ShapeType randomShape){
+    switch(randomShape){
         case Square:
             return std::shared_ptr<SquareShape> (new SquareShape());
-        case Lineshape:
+        case YiShape:
             return std::shared_ptr<LineShape> (new LineShape());
-        case Tshape:
+        case TtShape:
             return std::shared_ptr<TShape> (new TShape());
-        case LLshape:
+        case LLShape:
             return std::shared_ptr<LeftLShape> (new LeftLShape());
-        case RLshape:
+        case RLShape:
             return std::shared_ptr<RightLShape> (new RightLShape());
-        case LZshape:
+        case LZShape:
             return std::shared_ptr<LeftZShape> (new LeftZShape());
-        case RZshape:
+        case RZShape:
             return std::shared_ptr<RightZShape> (new RightZShape());
         default:
             //要有默认值来处理其他情况，但是不能被用户感知到
@@ -191,22 +205,68 @@ char UserCommand::getchar_no_output(){
     return ch;
 }
 
-void UserCommand::receiveCommand(){
-     system("stty -icanon");//直接接收一个字符，不用回车结束
+void UserCommand::receiveCmd(){
+     system("stty -icanon");
      char ch;
      while(true){
         ch = getchar_no_output();
         mtx.lock();
-        cmd = ch;
+        int cmd = ch;
+        userComannds.push(cmd);
         mtx.unlock();
     }
  }
+
 int UserCommand::getCmd(){
+    if(userComannds.empty()) return 0;
     int res;
     mtx.lock();
-    res = cmd;
-    cmd = 0;
+    res = userComannds.front();
+    userComannds.pop();
     mtx.unlock();
     return res;
 }
 
+void UserCommand::reponseCmd(MainScene&ms, Move mo, std::shared_ptr<Shape> shapes, int &row, int &col){
+    while(!userComannds.empty()){
+        int cmd = getCmd();
+        UserCommandType ucType = static_cast<UserCommandType>(cmd);
+        switch(ucType){
+            case ToDown:
+                if(mo.move(ms, shapes->Cells(), row, col,Move::Down))row++;
+                ms.printScreen(MainScene::UserInput);
+                break;
+            case ToLeft:
+                if(mo.move(ms, shapes->Cells(), row, col,Move::Left))col--;
+                ms.printScreen(MainScene::UserInput);
+                break;
+            case ToRight:
+                if(mo.move(ms, shapes->Cells(), row, col,Move::Right))col++;
+                ms.printScreen(MainScene::UserInput);
+                break;
+        }
+    }
+}
+void Game::run(){
+    ShapeType rand = randomShape();
+    std::shared_ptr<Shape> shapes = createShape(rand);
+    MainScene ms;
+    int row = 1, col = 4;
+    ms.joinSquare(shapes->Cells(), row, col);
+    ms.printScreen(MainScene::TimedFall);
+    Move mo;
+    UserCommand uc;
+    bool stop = false;
+    while(!stop){
+        uc.reponseCmd(ms, mo, shapes, row, col);
+        if(mo.move(ms, shapes->Cells(), row, col,Move::Down)){
+            row++;
+            ms.printScreen(MainScene::TimedFall);
+        }
+        else{
+            stop = true;
+            ms.print();
+        }
+       
+    }
+}

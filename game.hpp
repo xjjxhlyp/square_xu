@@ -15,6 +15,10 @@
 #include <thread>
 #include <unistd.h>
 #include <string>
+#include <cstdlib>
+#include <ctime>
+#include <queue>
+
 class Cell {
 public:
     enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
@@ -29,12 +33,13 @@ private:
 //枚举也是一个类，是全局的，不能放在函数里边
 enum ShapeType{
     Square,
-    Lineshape,
-    Tshape,
-    LLshape,
-    RLshape,
-    LZshape,
-    RZshape
+    YiShape,
+    TtShape,
+    LLShape,
+    RLShape,
+    LZShape,
+    RZShape,
+    ShapeTotal
 };
 class Shape{
     std::vector<std::vector<Cell>> cells;
@@ -43,6 +48,7 @@ protected://只有子类可见
         cells = squares;
     }
 public:
+    
     void rotate();
     std::vector<std::vector<Cell>> Cells(){
         return cells;
@@ -113,12 +119,20 @@ class MainScene {
     const int CellNumberPerRow = 12;
     const int CellNumberPerCol = 22;
 public:
+    enum EvenType{
+        UserInput,
+        TimedFall
+    };
+    
+public:
     std::vector<std::vector<Cell>> cells;
+public:
     MainScene();
     bool canJoin(std::vector<std::vector<Cell>> squares, int x, int y);
     void joinSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void cleanSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void print();
+    void printScreen(EvenType et);
 private:
     bool canRemove(int row);
     void RemoveOneRow(int row);
@@ -129,27 +143,43 @@ public:
     enum Direction {
         Down, Left, Right
     };
-    void move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
+    bool move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
 };
 
-std::shared_ptr<Shape> creatShape(ShapeType shapeType);
+std::shared_ptr<Shape> createShape();
+
+enum UserCommandType{
+    ToDown = 66,
+    ToLeft = 68,
+    ToRight = 67,
+    ToRotate = 65,
+    ToBottom = 32
+};
 
 class UserCommand{
 private:
     std::mutex mtx;
-    int cmd;
-    
+    std::queue<int> userComannds;
 private:
     char getchar_no_output();
-    //在类内使用线程，要用static修饰改函数
-    void receiveCommand();
+    void receiveCmd();
 public:
     UserCommand(){
-        cmd = 0;
-        std::thread th(&UserCommand::receiveCommand, this);
+        std::thread th(&UserCommand::receiveCmd, this);
         th.detach();
     }
     int getCmd();
+    void reponseCmd(MainScene&ms, Move mo, std::shared_ptr<Shape> shapes, int &row, int &col);
+};
+
+
+
+class Game{
+    ShapeType randomShape(){
+        return static_cast<ShapeType>(time(0) % ShapeType::ShapeTotal);// 输出随机选择的枚举值
+    }
+public:
+    void run();
 };
 
 #endif /* game_hpp */
