@@ -118,9 +118,9 @@ public:
     bool canJoin(std::vector<std::vector<Cell>> squares, int x, int y);
     void joinSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void cleanSquare(std::vector<std::vector<Cell>> squares, int x, int y);
-    void print();
     void printScreen();
 private:
+    void print();
     bool canRemove(int row);
     void RemoveOneRow(int row);
 };
@@ -158,4 +158,12 @@ public:
     int getCmd();
 };
 
+class Game{
+private:
+    ShapeType randomShape(){
+        return static_cast<ShapeType>(time(0) % 7);// 输出随机选择的枚举值
+    }
+public:
+    void run();
+};
 #endif /* game_hpp */
