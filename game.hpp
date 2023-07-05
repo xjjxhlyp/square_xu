@@ -126,16 +126,11 @@ private:
 };
 
 class Move {
-    bool moved;
 public:
     enum Direction {
         Down, Left, Right
     };
-    void move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
-    bool isMove(){
-        if(moved) return true;
-        return false;
-    }
+    bool move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
 };
 
 std::shared_ptr<Shape> creatShape(ShapeType shapeType);
@@ -144,25 +139,23 @@ class UserCommand{
 private:
     std::mutex mtx;
     int cmd;
-    
 private:
     char getchar_no_output();
     //在类内使用线程，要用static修饰改函数
     void receiveCommand();
+    void beginReceiveCmd(){
+        std::thread th(&UserCommand::receiveCommand, this);
+        th.detach();
+    }
 public:
     UserCommand(){
         cmd = 0;
-        std::thread th(&UserCommand::receiveCommand, this);
-        th.detach();
+        beginReceiveCmd();
     }
     int getCmd();
 };
 
 class Game{
-private:
-    ShapeType randomShape(){
-        return static_cast<ShapeType>(time(0) % 7);// 输出随机选择的枚举值
-    }
 public:
     void run();
 };

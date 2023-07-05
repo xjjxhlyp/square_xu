@@ -105,9 +105,9 @@ void MainScene::printScreen(){
     print();
     std::cout << std::endl;
     usleep(500000);
-    std::printf("\033[23A");
+    std::printf("\033[23A");//\033表示光标向上移动；23表示上移23行
 }
-void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di) {
+bool Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di) {
     int m = x, n = y;
     switch(di) {
     case Down:
@@ -123,11 +123,11 @@ void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, in
     ms.cleanSquare(squares,x, y);
     if(ms.canJoin(squares, m, n)){
         ms.joinSquare(squares, m, n);
-        moved = true;
+        return true;
     }
     else{
         ms.joinSquare(squares, x, y);
-        moved = false;
+        return false;
     }
 }
 
@@ -219,44 +219,5 @@ int UserCommand::getCmd(){
 
 void Game::run(){
     MainScene ms;
-    while(true){
-        std::shared_ptr<Shape> shapes = creatShape(randomShape());
-        int row = 1, col = 4;
-        ms.joinSquare(shapes->Cells(), row, col);
-        ms.printScreen();
-        Move mo;
-        UserCommand uc;
-        bool stop = false;
-        while(!stop){
-            int cmd =  uc.getCmd();
-            if(cmd == 66){
-                mo.move(ms, shapes->Cells(), row, col,Move::Down);
-                if(mo.isMove()){
-                    row++;
-                }
-            }
-            else if(cmd == 68){
-                mo.move(ms, shapes->Cells(), row, col,Move::Left);
-                if(mo.isMove()){
-                    col--;
-                }
-            }
-            else if(cmd == 67){
-                mo.move(ms, shapes->Cells(), row, col,Move::Right);
-                if(mo.isMove()){
-                    col++;
-                }
-            }
-            ms.printScreen();
-            mo.move(ms, shapes->Cells(), row, col,Move::Down);
-            if(mo.isMove()){
-                row++;
-                ms.printScreen();
-            }
-            else{
-                stop = true;
-                ms.printScreen();
-            }
-        }
-    }
+    ms.printScreen();
 }
