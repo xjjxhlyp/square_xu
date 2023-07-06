@@ -216,14 +216,13 @@ int UserCommand::getCmd(){
     mtx.unlock();
     return res;
 }
+
 ShapeType Game::randomShape(){
-    auto duration_since_epoch = std::chrono::system_clock::now().time_since_epoch(); // 从1970-01-01 00:00:00到当前时间点的时长
-    auto microseconds_since_epoch = std::chrono::duration_cast<std::chrono::microseconds>(duration_since_epoch).count(); // 将时长转换为微秒数
-    time_t seconds_since_epoch = static_cast<time_t>(microseconds_since_epoch / 1000000); // 将时长转换为秒数
-    std::tm current_time;
-    localtime_r(&seconds_since_epoch, &current_time ); // 获取当前时间（精确到秒）
-    auto tm_microsec = microseconds_since_epoch % 1000; // 当前时间的微秒数
-    return static_cast<ShapeType> (tm_microsec % ShapeTypeTotal);
+    int r = 0;
+    for(int i = 0; i < ShapeTypeTotal;i++ ){
+       r = rand();
+    }
+    return static_cast<ShapeType> (r % ShapeTypeTotal);
 }
 
 void Game::run(){
@@ -231,5 +230,3 @@ void Game::run(){
     MainScene ms;
     ms.printScreen();
 }
-
-
