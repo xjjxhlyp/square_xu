@@ -101,8 +101,13 @@ void MainScene::print() {
         std::cout << std::endl;
     }
 }
-
-void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di) {
+void MainScene::printScreen(){
+    print();
+    std::cout << std::endl;
+    usleep(500000);
+    std::printf("\033[23A");//\033表示光标向上移动；23表示上移23行
+}
+bool Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di) {
     int m = x, n = y;
     switch(di) {
     case Down:
@@ -118,9 +123,11 @@ void Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, in
     ms.cleanSquare(squares,x, y);
     if(ms.canJoin(squares, m, n)){
         ms.joinSquare(squares, m, n);
+        return true;
     }
     else{
         ms.joinSquare(squares, x, y);
+        return false;
     }
 }
 
@@ -210,3 +217,7 @@ int UserCommand::getCmd(){
     return res;
 }
 
+void Game::run(){
+    MainScene ms;
+    ms.printScreen();
+}

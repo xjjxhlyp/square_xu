@@ -118,8 +118,9 @@ public:
     bool canJoin(std::vector<std::vector<Cell>> squares, int x, int y);
     void joinSquare(std::vector<std::vector<Cell>> squares, int x, int y);
     void cleanSquare(std::vector<std::vector<Cell>> squares, int x, int y);
-    void print();
+    void printScreen();
 private:
+    void print();
     bool canRemove(int row);
     void RemoveOneRow(int row);
 };
@@ -129,7 +130,7 @@ public:
     enum Direction {
         Down, Left, Right
     };
-    void move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
+    bool move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
 };
 
 std::shared_ptr<Shape> creatShape(ShapeType shapeType);
@@ -138,7 +139,6 @@ class UserCommand{
 private:
     std::mutex mtx;
     int cmd;
-    
 private:
     char getchar_no_output();
     //在类内使用线程，要用static修饰改函数
@@ -146,10 +146,16 @@ private:
 public:
     UserCommand(){
         cmd = 0;
+    }
+    int getCmd();
+    void beginReceiveCmd(){
         std::thread th(&UserCommand::receiveCommand, this);
         th.detach();
     }
-    int getCmd();
 };
 
+class Game{
+public:
+    void run();
+};
 #endif /* game_hpp */
