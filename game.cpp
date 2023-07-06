@@ -217,7 +217,15 @@ int UserCommand::getCmd(){
     return res;
 }
 
+ShapeType Game::randomShape(){
+    return static_cast<ShapeType> (rand() % ShapeTypeTotal);
+}
+
 void Game::run(){
-    MainScene ms;
-    ms.printScreen();
+    while(true){
+        std::shared_ptr<Shape> shapes = creatShape(randomShape());
+        MainScene ms;
+        ms.joinSquare(shapes->Cells(), 2, 3);
+        ms.printScreen();
+    }
 }

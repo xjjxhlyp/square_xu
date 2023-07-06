@@ -34,7 +34,8 @@ enum ShapeType{
     LLshape,
     RLshape,
     LZshape,
-    RZshape
+    RZshape,
+    ShapeTypeTotal
 };
 class Shape{
     std::vector<std::vector<Cell>> cells;
@@ -155,6 +156,8 @@ public:
 };
 
 class Game{
+private:
+    ShapeType randomShape();
 public:
     void run();
 };

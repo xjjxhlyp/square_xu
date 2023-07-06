@@ -11,6 +11,7 @@
 
 using namespace std;
 int main() {
+    srand((unsigned)time(NULL));
     Game game;
     game.run();
     return 0;
