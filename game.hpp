@@ -143,16 +143,15 @@ private:
     char getchar_no_output();
     //在类内使用线程，要用static修饰改函数
     void receiveCommand();
+public:
+    UserCommand(){
+        cmd = 0;
+    }
+    int getCmd();
     void beginReceiveCmd(){
         std::thread th(&UserCommand::receiveCommand, this);
         th.detach();
     }
-public:
-    UserCommand(){
-        cmd = 0;
-        beginReceiveCmd();
-    }
-    int getCmd();
 };
 
 class Game{
