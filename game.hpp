@@ -54,7 +54,7 @@ public:
     std::vector<std::vector<Cell>> Cells(){
         return cells;
     }
-    std::vector<Point> squareShapePoints(){
+    std::vector<Point> points(){
         std::vector<Point> res;
         for(int i = 0; i < cells.size(); i++){
             for(int j = 0; j < cells[i].size(); j++){
@@ -66,10 +66,11 @@ public:
         }
         return res;
     }
-    int shapeLength(){
+    int length(){
         return cells.size();
     }
-    int shapeWidth(){
+    int width(){
+        if(cells.size() == 0) return 0;
         return cells[0].size();
     }
 };
@@ -183,8 +184,6 @@ public:
         th.detach();
     }
 };
-
-
 
 class Game{
 private:
