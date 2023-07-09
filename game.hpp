@@ -54,20 +54,25 @@ public:
     std::vector<std::vector<Cell>> Cells(){
         return cells;
     }
-    std::vector<Point> squareShapPoints(){
+    std::vector<Point> squareShapePoints(){
         std::vector<Point> res;
         for(int i = 0; i < cells.size(); i++){
             for(int j = 0; j < cells[i].size(); j++){
                 Point temp;
                 temp.row = i;
                 temp.col = j;
-                res.push_back(temp);
+                if(cells[i][j] == Cell{Cell::Square}) res.push_back(temp);
             }
         }
         return res;
     }
+    int shapeLength(){
+        return cells.size();
+    }
+    int shapeWidth(){
+        return cells[0].size();
+    }
 };
-
 
 class SquareShape : public Shape{
 public:
