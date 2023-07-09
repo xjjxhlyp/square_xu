@@ -148,7 +148,7 @@ void MainScene::RemoveOneRow(int row){
     }
 }
 
-std::shared_ptr<Shape> creatShape(ShapeType shapeType){
+std::shared_ptr<Shape> createShape(ShapeType shapeType){
     switch(shapeType){
         case Square:
             return std::shared_ptr<SquareShape> (new SquareShape());
@@ -223,7 +223,7 @@ ShapeType Game::randomShape(){
 
 void Game::run(){
     while(true){
-        std::shared_ptr<Shape> shapes = creatShape(randomShape());
+        std::shared_ptr<Shape> shapes = createShape(randomShape());
         MainScene ms;
         ms.joinSquare(shapes->Cells(), 2, 3);
         ms.printScreen();

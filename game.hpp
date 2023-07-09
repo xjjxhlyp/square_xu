@@ -66,10 +66,10 @@ public:
         }
         return res;
     }
-    int length(){
+    int width(){
         return cells.size();
     }
-    int width(){
+    int length(){
         if(cells.size() == 0) return 0;
         return cells[0].size();
     }
@@ -132,13 +132,17 @@ public:
     }){}
 };
 
-
 class ActiveShape{
 private:
     Point point;
     std::shared_ptr<Shape> shapes;
+public:
+    ActiveShape(int x, int y, std::shared_ptr<Shape> shape){
+        point.row = x;
+        point.col = y;
+        shapes = shape;
+    }
 };
-
 
 class MainScene {
     const int CellNumberPerRow = 12;
@@ -164,7 +168,7 @@ public:
     bool move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
 };
 
-std::shared_ptr<Shape> creatShape(ShapeType shapeType);
+std::shared_ptr<Shape> createShape(ShapeType shapeType);
 
 class UserCommand{
 private:
