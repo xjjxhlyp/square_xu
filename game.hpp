@@ -37,6 +37,12 @@ enum ShapeType{
     RZshape,
     ShapeTypeTotal
 };
+
+struct Point{
+    int row;
+    int col;
+};
+
 class Shape{
     std::vector<std::vector<Cell>> cells;
 protected://只有子类可见
@@ -48,7 +54,18 @@ public:
     std::vector<std::vector<Cell>> Cells(){
         return cells;
     }
-    
+    std::vector<Point> squareShapPoints(){
+        std::vector<Point> res;
+        for(int i = 0; i < cells.size(); i++){
+            for(int j = 0; j < cells[i].size(); j++){
+                Point temp;
+                temp.row = i;
+                temp.col = j;
+                res.push_back(temp);
+            }
+        }
+        return res;
+    }
 };
 
 
@@ -64,8 +81,7 @@ class LineShape : public Shape{
 public://子类的构造函数是public，外部才能创建对象
     LineShape(): Shape({
         {Cell{Cell::Square},Cell{Cell::Square},Cell{Cell::Square},Cell{Cell::Square}}
-    }){
-    }
+    }){}
 };
 
 class TShape : public Shape{
@@ -109,6 +125,14 @@ public:
         {Cell{Cell::Square}, Cell{Cell::Square},Cell{Cell::Space}}
     }){}
 };
+
+
+class ActiveShape{
+private:
+    Point point;
+    std::shared_ptr<Shape> shapes;
+};
+
 
 class MainScene {
     const int CellNumberPerRow = 12;
@@ -154,6 +178,8 @@ public:
         th.detach();
     }
 };
+
+
 
 class Game{
 private:
