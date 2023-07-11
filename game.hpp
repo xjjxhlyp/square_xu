@@ -119,15 +119,42 @@ public:
     }){}
 };
 
+class ActiveShape{
+private:
+    Point point;
+    std::shared_ptr<Shape> shape;
+public:
+    enum Direction {
+        Down, Left, Right
+    };
+    ActiveShape(int x, int y, std::shared_ptr<Shape> shapes){
+        point.row = x;
+        point.col = y;
+        shape = shapes;
+    }
+    std::vector<Point> activePoints();
+    bool isInBoundaries(int bottomBoundary, int rightBoundary);
+    bool canJoin(std::vector<std::vector<Cell>> mainScreen){
+        std::vector<Point> vp = activePoints();
+        for(int i = 0; i < vp.size(); i++){
+            if(mainScreen[vp[i].row][vp[i].col] == Cell{Cell::Square}) return false;
+        }
+        return true;
+    }
+    
+};
+
 class MainScene {
     const int CellNumberPerRow = 12;
     const int CellNumberPerCol = 22;
 public:
     std::vector<std::vector<Cell>> cells;
     MainScene();
-    bool canJoin(std::vector<std::vector<Cell>> squares, int x, int y);
-    void joinSquare(std::vector<std::vector<Cell>> squares, int x, int y);
-    void cleanSquare(std::vector<std::vector<Cell>> squares, int x, int y);
+    bool canJoin(ActiveShape as){
+        return (as.isInBoundaries(CellNumberPerCol,CellNumberPerRow) && as.canJoin(cells));
+    }
+    void joinSquare(ActiveShape as);
+    void cleanSquare(ActiveShape as);
     void printScreen();
 private:
     void print();
@@ -136,36 +163,6 @@ private:
 };
 
 
-class ActiveShape{
-private:
-    Point point;
-    std::shared_ptr<Shape> shape;
-public:
-    ActiveShape(int x, int y, std::shared_ptr<Shape> shape){
-        point.row = x;
-        point.col = y;
-        shape = shape;
-    }
-    
-    bool isBeyondBoundaries(int bottomBoundary, int rightBoundary){
-        if(point.row <= 0 || point.row >= bottomBoundary - shape->width()){
-            return false;
-        }
-        if(point.col <= 0 || point.col >= rightBoundary - shape->length()){
-            return false;
-        }
-        return true;
-    }
-    
-    std::vector<Point> activePoints(){
-        std::vector<Point> res = shape->points();
-        for(int i = 0; i < res.size(); i++){
-            res[i].row += point.row;
-            res[i].col += point.col;
-        }
-        return res;
-    }
-};
 
 class Move {
 public:

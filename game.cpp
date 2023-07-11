@@ -47,49 +47,19 @@ MainScene::MainScene() {
     cells.back() = std::vector<Cell>(CellNumberPerRow, Cell{Cell::BottomBoundary});
 }
 
-int shapeWidth(std::vector<std::vector<Cell>> squares){
-    int width = squares[0].size();
-    for(int i = 1; i < squares.size(); i++){
-        int rowWidth =squares[i].size();
-         width= std::max(width, rowWidth);
+
+void MainScene::joinSquare(ActiveShape as) {
+    if(!canJoin(as)) return;
+    std::vector<Point> vp = as.activePoints();
+    for (int i = 0; i < vp.size(); i++) {
+        cells[vp[i].row][vp[i].col] = Cell{Cell::Square};
     }
-    return width;
 }
 
-
-bool MainScene::canJoin(std::vector<std::vector<Cell>> squares, int x, int y){
-    if (x <= 0 || x  >= CellNumberPerCol - squares.size()) {
-        return false;
-    }
-    //要保证整个图形不会超出边界
-    int width = shapeWidth(squares);
-    if (y <= 0 || y >= CellNumberPerRow - width) {
-        return false;
-    }
-    for(int i = 0; i < squares.size(); i++){
-        for(int j = 0; j < squares[i].size(); j++){ //squares每行元素个数不一定一样
-            if (!squares[i][j].canJoin(cells[x + i][y + j])) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-    
-void MainScene::joinSquare(std::vector<std::vector<Cell>> squares, int x, int y) {
-    if(!canJoin((squares), x, y)) return;
-    for (int i = 0; i < squares.size(); i++) {
-        for (int j = 0; j < squares[i].size(); j++) {//squares每行元素个数不一定一样
-            if(squares[i][j] == Cell{Cell::Space}) continue;
-            cells[x + i][y + j] = squares[i][j];
-        }
-    }
-}
-void MainScene::cleanSquare(std::vector<std::vector<Cell>> squares, int x, int y){
-    for (int i = 0; i < squares.size(); i++) {
-        for (int j = 0; j < squares[i].size(); j++) {//squares每行元素个数不一定一样
-            cells[x + i][y + j] = Cell{Cell::Space};
-        }
+void MainScene::cleanSquare(ActiveShape as){
+    std::vector<Point> vp = as.activePoints();
+    for (int i = 0; i < vp.size(); i++) {
+        cells[vp[i].row][vp[i].col] = Cell{Cell::Space};
     }
 }
 
@@ -107,29 +77,7 @@ void MainScene::printScreen(){
     usleep(500000);
     std::printf("\033[23A");//\033表示光标向上移动；23表示上移23行
 }
-bool Move::move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di) {
-    int m = x, n = y;
-    switch(di) {
-    case Down:
-        m = x + 1;
-        break;
-    case Left:
-        n = y - 1;
-        break;
-    case Right:
-        n = y + 1;
-        break;
-    }
-    ms.cleanSquare(squares,x, y);
-    if(ms.canJoin(squares, m, n)){
-        ms.joinSquare(squares, m, n);
-        return true;
-    }
-    else{
-        ms.joinSquare(squares, x, y);
-        return false;
-    }
-}
+
 
 bool MainScene::canRemove(int row){
     for(int i = 1; i < cells[i].size() - 1; i++){
@@ -199,6 +147,25 @@ std::vector<Point> Shape::points(){
     return res;
 }
 
+bool ActiveShape::isInBoundaries(int bottomBoundary, int rightBoundary){
+    if(point.row <= 0 || point.row >= bottomBoundary - shape->width()){
+        return false;
+    }
+    if(point.col <= 0 || point.col >= rightBoundary - shape->length()){
+        return false;
+    }
+    return true;
+}
+
+std::vector<Point> ActiveShape::activePoints(){
+    std::vector<Point> res = shape->points();
+    for(int i = 0; i < res.size(); i++){
+        res[i].row += point.row;
+        res[i].col += point.col;
+    }
+    return res;
+}
+
 char UserCommand::getchar_no_output(){
     struct termios org_opts{};
     struct termios new_opts{};
@@ -237,8 +204,10 @@ ShapeType Game::randomShape(){
 void Game::run(){
     while(true){
         std::shared_ptr<Shape> shapes = createShape(randomShape());
+        int row = 1, col = 4;
+        ActiveShape as(row, col, shapes);
         MainScene ms;
-        ms.joinSquare(shapes->Cells(), 2, 3);
+        ms.joinSquare(as);
         ms.printScreen();
     }
 }
