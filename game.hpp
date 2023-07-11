@@ -119,39 +119,46 @@ public:
     }){}
 };
 
+enum Direction {
+    Down, Left, Right
+};
+
 class ActiveShape{
 private:
     Point point;
     std::shared_ptr<Shape> shape;
 public:
-    enum Direction {
-        Down, Left, Right
-    };
-    ActiveShape(int x, int y, std::shared_ptr<Shape> shapes){
-        point.row = x;
-        point.col = y;
+    ActiveShape(Point pt, std::shared_ptr<Shape> shapes){
+        point.row = pt.row;
+        point.col = pt.col;
         shape = shapes;
     }
     std::vector<Point> activePoints();
-    bool isInBoundaries(int bottomBoundary, int rightBoundary);
-    bool canJoin(std::vector<std::vector<Cell>> mainScreen){
-        std::vector<Point> vp = activePoints();
-        for(int i = 0; i < vp.size(); i++){
-            if(mainScreen[vp[i].row][vp[i].col] == Cell{Cell::Square}) return false;
-        }
-        return true;
-    }
+    bool isInBoundaries(int top, int bottom, int left, int right);
     
 };
 
 class MainScene {
     const int CellNumberPerRow = 12;
     const int CellNumberPerCol = 22;
+    const int initRow = 1;
+    const int initCol = 4;
 public:
     std::vector<std::vector<Cell>> cells;
     MainScene();
+    Point initPoint(){
+        Point pt;
+        pt.row = initRow;
+        pt.col = initCol;
+        return pt;
+    }
     bool canJoin(ActiveShape as){
-        return (as.isInBoundaries(CellNumberPerCol,CellNumberPerRow) && as.canJoin(cells));
+        if (!as.isInBoundaries(0,CellNumberPerCol,0, CellNumberPerRow)) return false;
+        std::vector<Point> vp = as.activePoints();
+        for(int i = 0; i < vp.size(); i++){
+            if(cells[vp[i].row][vp[i].col] == Cell{Cell::Square}) return false;
+        }
+        return true;
     }
     void joinSquare(ActiveShape as);
     void cleanSquare(ActiveShape as);
@@ -163,12 +170,11 @@ private:
 };
 
 
-
 class Move {
-public:
     enum Direction {
         Down, Left, Right
     };
+public:
     bool move(MainScene& ms, const std::vector<std::vector<Cell>>& squares, int x, int y, Direction di);
 };
 

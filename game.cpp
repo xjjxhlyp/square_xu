@@ -147,11 +147,11 @@ std::vector<Point> Shape::points(){
     return res;
 }
 
-bool ActiveShape::isInBoundaries(int bottomBoundary, int rightBoundary){
-    if(point.row <= 0 || point.row >= bottomBoundary - shape->width()){
+bool ActiveShape::isInBoundaries(int top, int bottom, int left, int right){
+    if(point.row <= top || point.row >= bottom - shape->width()){
         return false;
     }
-    if(point.col <= 0 || point.col >= rightBoundary - shape->length()){
+    if(point.col <= left || point.col >= right - shape->length()){
         return false;
     }
     return true;
@@ -203,10 +203,10 @@ ShapeType Game::randomShape(){
 
 void Game::run(){
     while(true){
-        std::shared_ptr<Shape> shapes = createShape(randomShape());
-        int row = 1, col = 4;
-        ActiveShape as(row, col, shapes);
         MainScene ms;
+        Point pt = ms.initPoint();
+        std::shared_ptr<Shape> shapes = createShape(randomShape());
+        ActiveShape as(pt, shapes);
         ms.joinSquare(as);
         ms.printScreen();
     }
