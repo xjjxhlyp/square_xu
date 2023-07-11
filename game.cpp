@@ -186,6 +186,19 @@ void Shape::rotate(){
     cells = res;
 }
 
+std::vector<Point> Shape::points(){
+    std::vector<Point> res;
+    for(int i = 0; i < cells.size(); i++){
+        for(int j = 0; j < cells[i].size(); j++){
+            Point temp;
+            temp.row = i;
+            temp.col = j;
+            if(cells[i][j] == Cell{Cell::Square}) res.push_back(temp);
+        }
+    }
+    return res;
+}
+
 char UserCommand::getchar_no_output(){
     struct termios org_opts{};
     struct termios new_opts{};
