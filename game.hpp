@@ -54,21 +54,8 @@ public:
     std::vector<std::vector<Cell>> Cells(){
         return cells;
     }
-    std::vector<Point> points(){
-        std::vector<Point> res;
-        for(int i = 0; i < cells.size(); i++){
-            for(int j = 0; j < cells[i].size(); j++){
-                Point temp;
-                temp.row = i;
-                temp.col = j;
-                if(cells[i][j] == Cell{Cell::Square}) res.push_back(temp);
-            }
-        }
-        return res;
-    }
-    int width(){
-        return cells.size();
-    }
+    std::vector<Point> points();
+    int width(){return cells.size();}
     int length(){
         if(cells.size() == 0) return 0;
         return cells[0].size();
@@ -132,18 +119,6 @@ public:
     }){}
 };
 
-class ActiveShape{
-private:
-    Point point;
-    std::shared_ptr<Shape> shapes;
-public:
-    ActiveShape(int x, int y, std::shared_ptr<Shape> shape){
-        point.row = x;
-        point.col = y;
-        shapes = shape;
-    }
-};
-
 class MainScene {
     const int CellNumberPerRow = 12;
     const int CellNumberPerCol = 22;
@@ -158,6 +133,38 @@ private:
     void print();
     bool canRemove(int row);
     void RemoveOneRow(int row);
+};
+
+
+class ActiveShape{
+private:
+    Point point;
+    std::shared_ptr<Shape> shape;
+public:
+    ActiveShape(int x, int y, std::shared_ptr<Shape> shape){
+        point.row = x;
+        point.col = y;
+        shape = shape;
+    }
+    
+    bool isBeyondBoundaries(int bottomBoundary, int rightBoundary){
+        if(point.row <= 0 || point.row >= bottomBoundary - shape->width()){
+            return false;
+        }
+        if(point.col <= 0 || point.col >= rightBoundary - shape->length()){
+            return false;
+        }
+        return true;
+    }
+    
+    std::vector<Point> activePoints(){
+        std::vector<Point> res = shape->points();
+        for(int i = 0; i < res.size(); i++){
+            res[i].row += point.row;
+            res[i].col += point.col;
+        }
+        return res;
+    }
 };
 
 class Move {
