@@ -139,26 +139,26 @@ private:
 class ActiveShape{
 private:
     Point point;
-    std::shared_ptr<Shape> shapes;
+    std::shared_ptr<Shape> shape;
 public:
     ActiveShape(int x, int y, std::shared_ptr<Shape> shape){
         point.row = x;
         point.col = y;
-        shapes = shape;
+        shape = shape;
     }
     
-    bool isBeyondBoundaries(int x, int y){
-        if(point.row <= 0 || point.row >= x - shapes->width()){
+    bool isBeyondBoundaries(int bottomBoundary, int rightBoundary){
+        if(point.row <= 0 || point.row >= bottomBoundary - shape->width()){
             return false;
         }
-        if(point.col <= 0 || point.col >= y - shapes->length()){
+        if(point.col <= 0 || point.col >= rightBoundary - shape->length()){
             return false;
         }
         return true;
     }
     
     std::vector<Point> activePoints(){
-        std::vector<Point> res = shapes->points();
+        std::vector<Point> res = shape->points();
         for(int i = 0; i < res.size(); i++){
             res[i].row += point.row;
             res[i].col += point.col;
