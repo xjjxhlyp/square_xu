@@ -48,7 +48,7 @@ MainScene::MainScene() {
 }
 
 
-void MainScene::joinSquare(const ActiveShape &as) {
+void MainScene::joinSquare(const ActiveShape& as) {
     if(!canJoin(as)) return;
     std::vector<Point> vp = as.activePoints();
     for (int i = 0; i < vp.size(); i++) {
@@ -56,7 +56,7 @@ void MainScene::joinSquare(const ActiveShape &as) {
     }
 }
 
-void MainScene::cleanSquare(const ActiveShape &as){
+void MainScene::cleanSquare(const ActiveShape& as){
     std::vector<Point> vp = as.activePoints();
     for (int i = 0; i < vp.size(); i++) {
         cells[vp[i].row][vp[i].col] = Cell{Cell::Space};
@@ -204,7 +204,7 @@ ShapeType Game::randomShape(){
 void Game::run(){
     while(true){
         MainScene ms;
-        Point pt = ms.beginPoint();
+        Point pt = ms.initShapePoint();
         std::shared_ptr<Shape> shapes = createShape(randomShape());
         ActiveShape as(pt, shapes);
         ms.joinSquare(as);

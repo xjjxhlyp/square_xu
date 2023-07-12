@@ -128,7 +128,7 @@ private:
     Point point;
     std::shared_ptr<Shape> shape;
 public:
-    ActiveShape(Point pt, const std::shared_ptr<Shape> &shapes): point(pt), shape(shapes){}
+    ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes){}
     std::vector<Point> activePoints() const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
 };
@@ -141,13 +141,13 @@ class MainScene {
 public:
     std::vector<std::vector<Cell>> cells;
     MainScene();
-    Point beginPoint(){
+    Point initShapePoint(){
         Point pt;
         pt.row = initRow;
         pt.col = initCol;
         return pt;
     }
-    bool canJoin(const ActiveShape &as){
+    bool canJoin(const ActiveShape& as){
         if (!as.isInBoundaries(0,CellNumberPerCol,0, CellNumberPerRow)) return false;
         std::vector<Point> vp = as.activePoints();
         for(int i = 0; i < vp.size(); i++){
@@ -155,8 +155,8 @@ public:
         }
         return true;
     }
-    void joinSquare(const ActiveShape &as);
-    void cleanSquare(const ActiveShape &as);
+    void joinSquare(const ActiveShape& as);
+    void cleanSquare(const ActiveShape& as);
     void printScreen();
 private:
     void print();
