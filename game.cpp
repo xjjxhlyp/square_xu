@@ -48,7 +48,7 @@ MainScene::MainScene() {
 }
 
 
-void MainScene::joinSquare(ActiveShape as) {
+void MainScene::joinSquare(const ActiveShape &as) {
     if(!canJoin(as)) return;
     std::vector<Point> vp = as.activePoints();
     for (int i = 0; i < vp.size(); i++) {
@@ -56,7 +56,7 @@ void MainScene::joinSquare(ActiveShape as) {
     }
 }
 
-void MainScene::cleanSquare(ActiveShape as){
+void MainScene::cleanSquare(const ActiveShape &as){
     std::vector<Point> vp = as.activePoints();
     for (int i = 0; i < vp.size(); i++) {
         cells[vp[i].row][vp[i].col] = Cell{Cell::Space};
@@ -147,7 +147,7 @@ std::vector<Point> Shape::points(){
     return res;
 }
 
-bool ActiveShape::isInBoundaries(int top, int bottom, int left, int right){
+bool ActiveShape::isInBoundaries(int top, int bottom, int left, int right) const{
     if(point.row <= top || point.row >= bottom - shape->width()){
         return false;
     }
@@ -157,7 +157,7 @@ bool ActiveShape::isInBoundaries(int top, int bottom, int left, int right){
     return true;
 }
 
-std::vector<Point> ActiveShape::activePoints(){
+std::vector<Point> ActiveShape::activePoints() const{
     std::vector<Point> res = shape->points();
     for(int i = 0; i < res.size(); i++){
         res[i].row += point.row;
@@ -204,7 +204,7 @@ ShapeType Game::randomShape(){
 void Game::run(){
     while(true){
         MainScene ms;
-        Point pt = ms.initPoint();
+        Point pt = ms.beginPoint();
         std::shared_ptr<Shape> shapes = createShape(randomShape());
         ActiveShape as(pt, shapes);
         ms.joinSquare(as);
