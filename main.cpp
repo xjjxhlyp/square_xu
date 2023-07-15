@@ -11,8 +11,24 @@
 
 using namespace std;
 int main() {
+    MainScene ms;
     Game game;
-    game.run();
+       while(true){
+           Point pt = ms.initShapePoint();
+           std::shared_ptr<Shape> shapes = createShape(game.randomShape());
+           ActiveShape as(pt, shapes);
+           ms.joinSquare(as);
+           ms.printScreen();
+           Move mo;
+           UserCommand uc;
+           uc.beginReceiveCmd();
+           bool stop = false;
+           while(!stop ){
+               Direction di = uc.getCmd();
+               mo.move(ms, as, di);
+               ms.printScreen();
+           }
+       }
     return 0;
 }
 

@@ -119,15 +119,31 @@ public:
     }){}
 };
 
+enum Direction {
+    Down = 66,
+    Left = 68,
+    Right = 67
+};
+
+
 class ActiveShape{
 private:
     Point point;
     std::shared_ptr<Shape> shape;
 public:
     ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes){}
-    void pointAfterMove(int x, int y){
-        point.row += x;
-        point.col += y;
+    void moveByDirection(Direction di){
+        switch(di) {
+        case Down:
+            point.row++;
+            break;
+        case Left:
+            point.col--;
+            break;
+        case Right:
+            point.col++;
+            break;
+        }
     }
     std::vector<Point> activePoints() const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
@@ -166,38 +182,18 @@ private:
     void RemoveOneRow(int row);
 };
 
-enum Direction {
-    Down = 66,
-    Left = 68,
-    Right = 67
-};
-
 class Move {
 public:
-    bool move(MainScene& ms, ActiveShape& as, Direction di){
+    void move(MainScene& ms, ActiveShape& as, Direction di){
         ms.cleanSquare(as);
-        ActiveShape as1 = as;
-        int x = 0, y = 0;
-        switch(di) {
-        case Down:
-            x++;
-            break;
-        case Left:
-            y--;
-            break;
-        case Right:
-            y++;
-            break;
-        }
-        as1.pointAfterMove(x, y);
-        if(ms.canJoin(as1)){
-            as = as1;
-            ms.joinSquare(as);
-            return true;
+        ActiveShape newAs = as;
+        newAs.moveByDirection(di);
+        if (ms.canJoin(newAs)) {
+            ms.joinSquare(newAs);
+            as = newAs;
         }
         else{
             ms.joinSquare(as);
-            return false;
         }
     }
 };
@@ -216,7 +212,7 @@ public:
     UserCommand(){
         cmd = 0;
     }
-    int getCmd();
+    Direction getCmd();
     void beginReceiveCmd(){
         std::thread th(&UserCommand::receiveCommand, this);
         th.detach();

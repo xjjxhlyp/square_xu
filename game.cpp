@@ -188,13 +188,13 @@ void UserCommand::receiveCommand(){
         mtx.unlock();
     }
  }
-int UserCommand::getCmd(){
+Direction UserCommand::getCmd(){
     int res;
     mtx.lock();
     res = cmd;
     cmd = 0;
     mtx.unlock();
-    return res;
+    return static_cast<Direction>(res);
 }
 
 ShapeType Game::randomShape(){
@@ -203,21 +203,7 @@ ShapeType Game::randomShape(){
 
 void Game::run(){
     MainScene ms;
-    while(true){
-        Point pt = ms.initShapePoint();
-        std::shared_ptr<Shape> shapes = createShape(randomShape());
-        ActiveShape as(pt, shapes);
-        ms.joinSquare(as);
-        ms.printScreen();
-        Move mo;
-        UserCommand uc;
-        uc.beginReceiveCmd();
-        bool stop = false;
-        while(!stop ){
-            int cmd = uc.getCmd();
-            Direction di = static_cast<Direction>(cmd);
-            mo.move(ms, as, di);
-            ms.printScreen();
-        }
-    }
+    UserCommand uc;
+    uc.beginReceiveCmd();
+    ms.printScreen();
 }
