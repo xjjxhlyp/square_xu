@@ -11,11 +11,9 @@
 
 using namespace std;
 int main() {
-    std::shared_ptr<Shape> shapes = createShape(Tshape);
-    std::vector<Point> points = shapes->points();
-    for(int i = 0; i < points.size(); i++){
-        std::cout << points[i].row << points[i].col << std::endl;
-    }
+    Game game;
+    game.run();
     return 0;
 }
+
 
