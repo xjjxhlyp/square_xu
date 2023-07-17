@@ -10,6 +10,7 @@
 #include <unistd.h>//包含sleep()的头文件
 
 using namespace std;
+
 int main() {
     MainScene ms;
     Game game;
@@ -19,13 +20,12 @@ int main() {
            ActiveShape as(pt, shapes);
            ms.joinSquare(as);
            ms.printScreen();
-           Move mo;
            UserCommand uc;
            uc.beginReceiveCmd();
            bool stop = false;
            while(!stop ){
-               Direction di = uc.getCmd();
-               mo.move(ms, as, di);
+               Command cmd = uc.getCmd();
+               game.move(ms, as, cmd);
                ms.printScreen();
            }
        }

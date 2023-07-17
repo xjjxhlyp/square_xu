@@ -119,10 +119,18 @@ public:
     }){}
 };
 
-enum Direction {
-    Down = 66,
-    Left = 68,
-    Right = 67
+const int down = 66;
+const int left = 68;
+const int right = 67;
+const int downToBottom = 32;
+const int roate = 65;
+enum Command {
+    Unknown,
+    Down = down,
+    Left = left,
+    Right = right,
+    Rotate = roate,
+    DownToBottom = downToBottom,
 };
 
 
@@ -130,20 +138,28 @@ class ActiveShape{
 private:
     Point point;
     std::shared_ptr<Shape> shape;
+    Point lastPoint;
 public:
-    ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes){}
-    void moveByDirection(Direction di){
-        switch(di) {
+    ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt){}
+    void move(Command cmd){
+        lastPoint = point;
+        switch(cmd) {
         case Down:
+            lastPoint.row = point.row;
             point.row++;
             break;
         case Left:
+            lastPoint.col = point.col;
             point.col--;
             break;
         case Right:
+            lastPoint.col = point.col;
             point.col++;
             break;
         }
+    }
+    void rollback(){
+        point = lastPoint;
     }
     std::vector<Point> activePoints() const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
@@ -182,37 +198,21 @@ private:
     void RemoveOneRow(int row);
 };
 
-class Move {
-public:
-    void move(MainScene& ms, ActiveShape& as, Direction di){
-        ms.cleanSquare(as);
-        ActiveShape newAs = as;
-        newAs.moveByDirection(di);
-        if (ms.canJoin(newAs)) {
-            ms.joinSquare(newAs);
-            as = newAs;
-        }
-        else{
-            ms.joinSquare(as);
-        }
-    }
-};
-
 std::shared_ptr<Shape> createShape(ShapeType shapeType);
 
 class UserCommand{
 private:
     std::mutex mtx;
-    int cmd;
+    Command cmd;
 private:
     char getchar_no_output();
     //在类内使用线程，要用static修饰改函数
     void receiveCommand();
 public:
     UserCommand(){
-        cmd = 0;
+        cmd = Unknown;
     }
-    Direction getCmd();
+    Command getCmd();
     void beginReceiveCmd(){
         std::thread th(&UserCommand::receiveCommand, this);
         th.detach();
@@ -220,9 +220,17 @@ public:
 };
 
 class Game{
-private:
+public:
     ShapeType randomShape();
 public:
+    void move(MainScene& ms, ActiveShape& as, Command cmd){
+         ms.cleanSquare(as);
+         as.move(cmd);
+         if (!ms.canJoin(as)) {
+             as.rollback();
+         }
+         ms.joinSquare(as);
+     }
     void run();
 };
 #endif /* game_hpp */

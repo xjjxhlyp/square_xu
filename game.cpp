@@ -184,17 +184,17 @@ void UserCommand::receiveCommand(){
      while(true){
         ch = getchar_no_output();
         mtx.lock();
-        cmd = ch;
+        cmd = static_cast<Command>(ch);
         mtx.unlock();
     }
  }
-Direction UserCommand::getCmd(){
-    int res;
+Command UserCommand::getCmd(){
+    Command res;
     mtx.lock();
     res = cmd;
-    cmd = 0;
+    cmd = Unknown;
     mtx.unlock();
-    return static_cast<Direction>(res);
+    return res;
 }
 
 ShapeType Game::randomShape(){
