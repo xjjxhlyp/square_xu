@@ -184,17 +184,31 @@ void UserCommand::receiveCommand(){
      while(true){
         ch = getchar_no_output();
         mtx.lock();
-        cmd = static_cast<Command>(ch);
+        cmd = ch;
         mtx.unlock();
     }
  }
 Command UserCommand::getCmd(){
-    Command res;
+    int res;
     mtx.lock();
     res = cmd;
-    cmd = Unknown;
+    cmd = 0;
     mtx.unlock();
-    return res;
+    if(res == down) {
+        return Down;
+    }
+    else if (res == left) {
+        return Left;
+    }
+    else if (res == right) {
+        return Right;
+    }
+    else if (res == downToBottom) {
+        return DownToBottom;
+    }
+    else {
+        return Rotate;
+    }
 }
 
 ShapeType Game::randomShape(){
