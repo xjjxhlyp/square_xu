@@ -154,10 +154,10 @@ std::vector<Point> Shape::points(){
 }
 
 bool ActiveShape::isInBoundaries(int top, int bottom, int left, int right) const{
-    if(point.row <= top || point.row >= bottom - shape->width()){
+    if(point.row <= top || point.row >= bottom - shape->height()){
         return false;
     }
-    if(point.col <= left || point.col >= right - shape->length()){
+    if(point.col <= left || point.col >= right - shape->width()){
         return false;
     }
     return true;
@@ -231,7 +231,7 @@ ShapeType Game::randomShape(){
 
 void Game::move(MainScene& ms, ActiveShape& as, Command cmd){
      ms.cleanSquare(as);
-     as.move(cmd);
+     as.move(cmd, ms.width(), ms.height());
      if (!ms.canJoin(as)) {
          as.rollback();
      }

@@ -44,6 +44,7 @@ struct Point{
 };
 
 class Shape{
+private:
     std::vector<std::vector<Cell>> cells;
 protected://只有子类可见
     Shape(std::vector<std::vector<Cell>> squares){
@@ -51,12 +52,9 @@ protected://只有子类可见
     }
 public:
     void rotate();
-    std::vector<std::vector<Cell>> Cells(){
-        return cells;
-    }
     std::vector<Point> points();
-    int width(){return cells.size();}
-    int length(){
+    int height(){return cells.size();}
+    int width(){
         if(cells.size() == 0) return 0;
         return cells[0].size();
     }
@@ -133,25 +131,38 @@ private:
     Point point;
     std::shared_ptr<Shape> shape;
     Point lastPoint;
+    std::shared_ptr<Shape> lastShape;
 public:
     ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt){}
-    void move(Command cmd){
+    void move(Command cmd, int right, int bottom){
         lastPoint = point;
+        lastShape = shape;
         switch(cmd) {
-        case Down:
-            point.row++;
-            break;
-        case Left:
-            point.col--;
-            break;
-        case Right:
-            point.col++;
-            break;
+            case Down:
+                point.row++;
+                break;
+            case Left:
+                point.col--;
+                break;
+            case Right:
+                point.col++;
+                break;
+            case Rotate:
+                shape->rotate();
+                while(point.col >= right - shape->width()) point.col--;
+                while(point.row >= bottom - shape->height()) point.row--;
+                break;
+            case DownToBottom:
+                while(point.row < bottom - shape->height() - 1) point.row++;
+                break;
         }
     }
+    
     void rollback(){
         point = lastPoint;
+        shape = lastShape;
     }
+    
     std::vector<Point> activePoints() const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
 };
@@ -171,6 +182,8 @@ public:
         pt.col = initCol;
         return pt;
     }
+    int width() {return CellNumberPerRow;}
+    int height() {return CellNumberPerCol;}
     bool canJoin(const ActiveShape& as);
     void joinSquare(const ActiveShape& as);
     void cleanSquare(const ActiveShape& as);
