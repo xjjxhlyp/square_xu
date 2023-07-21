@@ -171,14 +171,7 @@ public:
         pt.col = initCol;
         return pt;
     }
-    bool canJoin(const ActiveShape& as){
-        if (!as.isInBoundaries(0,CellNumberPerCol,0, CellNumberPerRow)) return false;
-        std::vector<Point> vp = as.activePoints();
-        for(int i = 0; i < vp.size(); i++){
-            if(cells[vp[i].row][vp[i].col] == Cell{Cell::Square}) return false;
-        }
-        return true;
-    }
+    bool canJoin(const ActiveShape& as);
     void joinSquare(const ActiveShape& as);
     void cleanSquare(const ActiveShape& as);
     void printScreen();
@@ -196,7 +189,6 @@ private:
     Command cmd;
 private:
     char getchar_no_output();
-    //在类内使用线程，要用static修饰改函数
     void receiveCommand();
 public:
     UserCommand(){
@@ -207,21 +199,14 @@ public:
         std::thread th(&UserCommand::receiveCommand, this);
         th.detach();
     }
-    void transformInputToCommand(char ch);
+    Command transformInputToCommand(char ch);
 };
 
 class Game{
 public:
     ShapeType randomShape();
 public:
-    void move(MainScene& ms, ActiveShape& as, Command cmd){
-         ms.cleanSquare(as);
-         as.move(cmd);
-         if (!ms.canJoin(as)) {
-             as.rollback();
-         }
-         ms.joinSquare(as);
-     }
+    void move(MainScene& ms, ActiveShape& as, Command cmd);
     void run();
 };
 #endif /* game_hpp */

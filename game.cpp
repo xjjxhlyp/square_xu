@@ -46,6 +46,14 @@ MainScene::MainScene() {
     cells.back() = std::vector<Cell>(CellNumberPerRow, Cell{Cell::BottomBoundary});
 }
 
+bool MainScene::canJoin(const ActiveShape& as){
+    if (!as.isInBoundaries(0,CellNumberPerCol,0, CellNumberPerRow)) return false;
+    std::vector<Point> vp = as.activePoints();
+    for(int i = 0; i < vp.size(); i++){
+        if(cells[vp[i].row][vp[i].col] == Cell{Cell::Square}) return false;
+    }
+    return true;
+}
 
 void MainScene::joinSquare(const ActiveShape& as) {
     if(!canJoin(as)) return;
@@ -176,7 +184,7 @@ char UserCommand::getchar_no_output(){
     return ch;
 }
 
-void UserCommand::transformInputToCommand(char ch){
+Command UserCommand::transformInputToCommand(char ch){
     const int down = 66;
     const int left = 68;
     const int right = 67;
@@ -184,21 +192,17 @@ void UserCommand::transformInputToCommand(char ch){
     const int rotate = 65;
     switch(ch){
         case down:
-            cmd = Down;
-            break;
+            return Down;
         case left:
-            cmd = Left;
-            break;
+            return Left;
         case right:
-            cmd = Right;
-            break;
+            return Right;
         case downToBottom:
-            cmd = DownToBottom;
-            break;
+            return DownToBottom;
         case rotate:
-            cmd = Rotate;
-            break;
+            return Rotate;
     }
+    return Unknown;
 }
 
 void UserCommand::receiveCommand(){
@@ -207,7 +211,7 @@ void UserCommand::receiveCommand(){
      while(true){
         ch = getchar_no_output();
         mtx.lock();
-        transformInputToCommand(ch);
+        cmd = transformInputToCommand(ch);
         mtx.unlock();
     }
  }
@@ -224,6 +228,15 @@ Command UserCommand::getCmd(){
 ShapeType Game::randomShape(){
     return static_cast<ShapeType> (rand() % ShapeTypeTotal);
 }
+
+void Game::move(MainScene& ms, ActiveShape& as, Command cmd){
+     ms.cleanSquare(as);
+     as.move(cmd);
+     if (!ms.canJoin(as)) {
+         as.rollback();
+     }
+     ms.joinSquare(as);
+ }
 
 void Game::run(){
     MainScene ms;
