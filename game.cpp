@@ -14,7 +14,6 @@
 #include <unistd.h>//包含sleep()的头文件
 #include <vector>
 
-
 std::ostream& operator<<(std::ostream& out, Cell& cell) {
     if (cell.type == Cell::LeftBoundary) {
         std::cout << " |";
@@ -25,7 +24,7 @@ std::ostream& operator<<(std::ostream& out, Cell& cell) {
     } else if (cell.type == Cell::BottomBoundary) {
         std::cout << "--";
     } else if (cell.type == Cell::Space) {
-        std::cout << "  " ;
+        std::cout << "  ";
     } else if (cell.type == Cell::Square) {
         std::cout << "🟥";
     }
@@ -47,6 +46,14 @@ MainScene::MainScene() {
     cells.back() = std::vector<Cell>(CellNumberPerRow, Cell{Cell::BottomBoundary});
 }
 
+bool MainScene::canJoin(const ActiveShape& as){
+    if (!as.isInBoundaries(0,CellNumberPerCol,0, CellNumberPerRow)) return false;
+    std::vector<Point> vp = as.activePoints();
+    for(int i = 0; i < vp.size(); i++){
+        if(cells[vp[i].row][vp[i].col] == Cell{Cell::Square}) return false;
+    }
+    return true;
+}
 
 void MainScene::joinSquare(const ActiveShape& as) {
     if(!canJoin(as)) return;
@@ -75,9 +82,8 @@ void MainScene::printScreen(){
     print();
     std::cout << std::endl;
     usleep(500000);
-    std::printf("\033[23A");//\033表示光标向上移动；23表示上移23行
+    printf("\033[23A");//\033表示光标向上移动；23表示上移23行
 }
-
 
 bool MainScene::canRemove(int row){
     for(int i = 1; i < cells[i].size() - 1; i++){
@@ -148,10 +154,10 @@ std::vector<Point> Shape::points(){
 }
 
 bool ActiveShape::isInBoundaries(int top, int bottom, int left, int right) const{
-    if(point.row <= top || point.row >= bottom - shape->width()){
+    if(point.row <= top || point.row >= bottom - shape->height()){
         return false;
     }
-    if(point.col <= left || point.col >= right - shape->length()){
+    if(point.col <= left || point.col >= right - shape->width()){
         return false;
     }
     return true;
@@ -178,21 +184,43 @@ char UserCommand::getchar_no_output(){
     return ch;
 }
 
+Command UserCommand::transformInputToCommand(char ch){
+    const int down = 66;
+    const int left = 68;
+    const int right = 67;
+    const int downToBottom = 32;
+    const int rotate = 65;
+    switch(ch){
+        case down:
+            return Down;
+        case left:
+            return Left;
+        case right:
+            return Right;
+        case downToBottom:
+            return DownToBottom;
+        case rotate:
+            return Rotate;
+    }
+    return Unknown;
+}
+
 void UserCommand::receiveCommand(){
      system("stty -icanon");//直接接收一个字符，不用回车结束
      char ch;
      while(true){
         ch = getchar_no_output();
         mtx.lock();
-        cmd = ch;
+        cmd = transformInputToCommand(ch);
         mtx.unlock();
     }
  }
-int UserCommand::getCmd(){
-    int res;
+
+Command UserCommand::getCmd(){
+    Command res;
     mtx.lock();
     res = cmd;
-    cmd = 0;
+    cmd = Unknown;
     mtx.unlock();
     return res;
 }
@@ -201,13 +229,18 @@ ShapeType Game::randomShape(){
     return static_cast<ShapeType> (rand() % ShapeTypeTotal);
 }
 
+void Game::move(MainScene& ms, ActiveShape& as, Command cmd){
+     ms.cleanSquare(as);
+     as.move(cmd, ms.width(), ms.height());
+     if (!ms.canJoin(as)) {
+         as.rollback();
+     }
+     ms.joinSquare(as);
+ }
+
 void Game::run(){
-    while(true){
-        MainScene ms;
-        Point pt = ms.initShapePoint();
-        std::shared_ptr<Shape> shapes = createShape(randomShape());
-        ActiveShape as(pt, shapes);
-        ms.joinSquare(as);
-        ms.printScreen();
-    }
+    MainScene ms;
+    UserCommand uc;
+    uc.beginReceiveCmd();
+    ms.printScreen();
 }
