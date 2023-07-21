@@ -14,7 +14,6 @@
 #include <unistd.h>//包含sleep()的头文件
 #include <vector>
 
-
 std::ostream& operator<<(std::ostream& out, Cell& cell) {
     if (cell.type == Cell::LeftBoundary) {
         std::cout << " |";
@@ -25,7 +24,7 @@ std::ostream& operator<<(std::ostream& out, Cell& cell) {
     } else if (cell.type == Cell::BottomBoundary) {
         std::cout << "--";
     } else if (cell.type == Cell::Space) {
-        std::cout << "  " ;
+        std::cout << "  ";
     } else if (cell.type == Cell::Square) {
         std::cout << "🟥";
     }
@@ -75,9 +74,8 @@ void MainScene::printScreen(){
     print();
     std::cout << std::endl;
     usleep(500000);
-    std::printf("\033[23A");//\033表示光标向上移动；23表示上移23行
+    printf("\033[23A");//\033表示光标向上移动；23表示上移23行
 }
-
 
 bool MainScene::canRemove(int row){
     for(int i = 1; i < cells[i].size() - 1; i++){
@@ -178,37 +176,49 @@ char UserCommand::getchar_no_output(){
     return ch;
 }
 
+void UserCommand::transformInputToCommand(char ch){
+    const int down = 66;
+    const int left = 68;
+    const int right = 67;
+    const int downToBottom = 32;
+    const int rotate = 65;
+    switch(ch){
+        case down:
+            cmd = Down;
+            break;
+        case left:
+            cmd = Left;
+            break;
+        case right:
+            cmd = Right;
+            break;
+        case downToBottom:
+            cmd = DownToBottom;
+            break;
+        case rotate:
+            cmd = Rotate;
+            break;
+    }
+}
+
 void UserCommand::receiveCommand(){
      system("stty -icanon");//直接接收一个字符，不用回车结束
      char ch;
      while(true){
         ch = getchar_no_output();
         mtx.lock();
-        cmd = ch;
+        transformInputToCommand(ch);
         mtx.unlock();
     }
  }
+
 Command UserCommand::getCmd(){
-    int res;
+    Command res;
     mtx.lock();
     res = cmd;
-    cmd = 0;
+    cmd = Unknown;
     mtx.unlock();
-    if(res == down) {
-        return Down;
-    }
-    else if (res == left) {
-        return Left;
-    }
-    else if (res == right) {
-        return Right;
-    }
-    else if (res == downToBottom) {
-        return DownToBottom;
-    }
-    else {
-        return Rotate;
-    }
+    return res;
 }
 
 ShapeType Game::randomShape(){

@@ -119,20 +119,14 @@ public:
     }){}
 };
 
-const int down = 66;
-const int left = 68;
-const int right = 67;
-const int downToBottom = 32;
-const int roate = 65;
 enum Command {
     Unknown,
-    Down = down,
-    Left = left,
-    Right = right,
-    Rotate = roate,
-    DownToBottom = downToBottom,
+    Down,
+    Left,
+    Right,
+    Rotate,
+    DownToBottom,
 };
-
 
 class ActiveShape{
 private:
@@ -145,15 +139,12 @@ public:
         lastPoint = point;
         switch(cmd) {
         case Down:
-            lastPoint.row = point.row;
             point.row++;
             break;
         case Left:
-            lastPoint.col = point.col;
             point.col--;
             break;
         case Right:
-            lastPoint.col = point.col;
             point.col++;
             break;
         }
@@ -164,7 +155,6 @@ public:
     std::vector<Point> activePoints() const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
 };
-
 
 class MainScene {
 private:
@@ -217,6 +207,7 @@ public:
         std::thread th(&UserCommand::receiveCommand, this);
         th.detach();
     }
+    void transformInputToCommand(char ch);
 };
 
 class Game{
