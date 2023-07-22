@@ -15,6 +15,8 @@
 #include <thread>
 #include <unistd.h>
 #include <string>
+#include <queue>
+
 class Cell {
 public:
     enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
@@ -134,7 +136,17 @@ private:
     std::shared_ptr<Shape> lastShape;
 public:
     ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt){}
-    void move(Command cmd, int right, int bottom){
+    
+    void rotate(int rightBoundary, int bottomBoundary){
+        shape->rotate();
+        while(point.col + shape->width()>= rightBoundary) point.col--;
+        while(point.row + shape->height()>= bottomBoundary) point.row--;
+    }
+    
+    void downToBottom(int bottomBoundary){
+        while(point.row + shape->height()< bottomBoundary  - 1) point.row++;
+    }
+    void responseCommand(Command cmd, int rightBoundary, int bottomBoundary){
         lastPoint = point;
         lastShape = shape;
         switch(cmd) {
@@ -148,12 +160,10 @@ public:
                 point.col++;
                 break;
             case Rotate:
-                shape->rotate();
-                while(point.col >= right - shape->width()) point.col--;
-                while(point.row >= bottom - shape->height()) point.row--;
+                rotate(rightBoundary, bottomBoundary);
                 break;
             case DownToBottom:
-                while(point.row < bottom - shape->height() - 1) point.row++;
+                downToBottom(bottomBoundary);
                 break;
         }
     }
@@ -167,7 +177,7 @@ public:
     bool isInBoundaries(int top, int bottom, int left, int right) const;
 };
 
-class MainScene {
+class MainScreen {
 private:
     const int CellNumberPerRow = 12;
     const int CellNumberPerCol = 22;
@@ -175,7 +185,7 @@ private:
     const int initCol = 4;
 public:
     std::vector<std::vector<Cell>> cells;
-    MainScene();
+    MainScreen();
     Point initShapePoint(){
         Point pt;
         pt.row = initRow;
@@ -199,14 +209,11 @@ std::shared_ptr<Shape> createShape(ShapeType shapeType);
 class UserCommand{
 private:
     std::mutex mtx;
-    Command cmd;
+    std::queue<Command> cmds;
 private:
     char getchar_no_output();
     void receiveCommand();
 public:
-    UserCommand(){
-        cmd = Unknown;
-    }
     Command getCmd();
     void beginReceiveCmd(){
         std::thread th(&UserCommand::receiveCommand, this);
@@ -216,10 +223,13 @@ public:
 };
 
 class Game{
+
 public:
     ShapeType randomShape();
 public:
-    void move(MainScene& ms, ActiveShape& as, Command cmd);
+    void response(MainScreen& ms, ActiveShape& as, Command cmd);
+    
+    
     void run();
 };
 #endif /* game_hpp */

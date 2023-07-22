@@ -32,7 +32,7 @@ std::ostream& operator<<(std::ostream& out, Cell& cell) {
 }
 
 
-MainScene::MainScene() {
+MainScreen::MainScreen() {
     cells.resize(CellNumberPerCol);
         
     cells[0] = std::vector<Cell>(CellNumberPerRow, Cell{Cell::TopBoundary});
@@ -46,7 +46,7 @@ MainScene::MainScene() {
     cells.back() = std::vector<Cell>(CellNumberPerRow, Cell{Cell::BottomBoundary});
 }
 
-bool MainScene::canJoin(const ActiveShape& as){
+bool MainScreen::canJoin(const ActiveShape& as){
     if (!as.isInBoundaries(0,CellNumberPerCol,0, CellNumberPerRow)) return false;
     std::vector<Point> vp = as.activePoints();
     for(int i = 0; i < vp.size(); i++){
@@ -55,7 +55,7 @@ bool MainScene::canJoin(const ActiveShape& as){
     return true;
 }
 
-void MainScene::joinSquare(const ActiveShape& as) {
+void MainScreen::joinSquare(const ActiveShape& as) {
     if(!canJoin(as)) return;
     std::vector<Point> vp = as.activePoints();
     for (int i = 0; i < vp.size(); i++) {
@@ -63,14 +63,14 @@ void MainScene::joinSquare(const ActiveShape& as) {
     }
 }
 
-void MainScene::cleanSquare(const ActiveShape& as){
+void MainScreen::cleanSquare(const ActiveShape& as){
     std::vector<Point> vp = as.activePoints();
     for (int i = 0; i < vp.size(); i++) {
         cells[vp[i].row][vp[i].col] = Cell{Cell::Space};
     }
 }
 
-void MainScene::print() {
+void MainScreen::print() {
     for (int i = 0; i < CellNumberPerCol; i++) {
         for (int j = 0; j < CellNumberPerRow; j++) {
             std::cout << cells[i][j];
@@ -78,14 +78,13 @@ void MainScene::print() {
         std::cout << std::endl;
     }
 }
-void MainScene::printScreen(){
+void MainScreen::printScreen(){
     print();
     std::cout << std::endl;
-    usleep(500000);
     printf("\033[23A");//\033表示光标向上移动；23表示上移23行
 }
 
-bool MainScene::canRemove(int row){
+bool MainScreen::canRemove(int row){
     for(int i = 1; i < cells[i].size() - 1; i++){
         if(cells[row][i] == Cell{Cell::Space}){
             return false;
@@ -94,7 +93,7 @@ bool MainScene::canRemove(int row){
     return true;
 }
 
-void MainScene::RemoveOneRow(int row){
+void MainScreen::RemoveOneRow(int row){
     if(canRemove(row)){
         for(int i = 1; i < cells[i].size()-1; i++){
             cells[row][i] = Cell{Cell::Space};
@@ -211,16 +210,20 @@ void UserCommand::receiveCommand(){
      while(true){
         ch = getchar_no_output();
         mtx.lock();
-        cmd = transformInputToCommand(ch);
+        cmds.push(transformInputToCommand(ch));
         mtx.unlock();
     }
+    
  }
 
 Command UserCommand::getCmd(){
-    Command res;
+    Command res = Unknown;
     mtx.lock();
-    res = cmd;
-    cmd = Unknown;
+    if(!cmds.empty()){
+        res = cmds.front();
+        cmds.pop();
+        
+    }
     mtx.unlock();
     return res;
 }
@@ -229,9 +232,9 @@ ShapeType Game::randomShape(){
     return static_cast<ShapeType> (rand() % ShapeTypeTotal);
 }
 
-void Game::move(MainScene& ms, ActiveShape& as, Command cmd){
+void Game::response(MainScreen& ms, ActiveShape& as, Command cmd){
      ms.cleanSquare(as);
-     as.move(cmd, ms.width(), ms.height());
+     as.responseCommand(cmd, ms.width(), ms.height());
      if (!ms.canJoin(as)) {
          as.rollback();
      }
@@ -239,7 +242,7 @@ void Game::move(MainScene& ms, ActiveShape& as, Command cmd){
  }
 
 void Game::run(){
-    MainScene ms;
+    MainScreen ms;
     UserCommand uc;
     uc.beginReceiveCmd();
     ms.printScreen();

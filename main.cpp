@@ -12,11 +12,11 @@
 using namespace std;
 
 int main() {
-    MainScene ms;
+    MainScreen ms;
     Game game;
        while(true){
            Point pt = ms.initShapePoint();
-           std::shared_ptr<Shape> shapes = createShape(game.randomShape());
+           std::shared_ptr<Shape> shapes = createShape(Lineshape);
            ActiveShape as(pt, shapes);
            ms.joinSquare(as);
            ms.printScreen();
@@ -25,10 +25,11 @@ int main() {
            bool stop = false;
            while(!stop ){
                Command cmd = uc.getCmd();
-               game.move(ms, as, cmd);
+               game.response(ms, as, cmd);
                ms.printScreen();
            }
        }
+    
     return 0;
 }
 
