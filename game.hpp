@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <string>
 #include <queue>
-
+#include <condition_variable>
 class Cell {
 public:
     enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
@@ -209,6 +209,7 @@ std::shared_ptr<Shape> createShape(ShapeType shapeType);
 class UserCommand{
 private:
     std::mutex mtx;
+    std::condition_variable cv;
     std::queue<Command> cmds;
 private:
     char getchar_no_output();
