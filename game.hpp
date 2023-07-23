@@ -23,7 +23,8 @@ public:
     Cell(CellType t): type(t) {}
     bool canJoin(const Cell& cell) {return (this->type == Space || cell.type == Space);}
     friend std::ostream& operator<<(std::ostream& out, Cell& cell);
-    friend bool operator==(const Cell& cell1, const Cell& cell2) {return cell1.type == cell2.type;}
+    bool operator==(const Cell& cell2) {return type == cell2.type;}
+    bool operator!=(const Cell& cell2) {return type != cell2.type;}
 private:
     CellType type;
 };
@@ -59,6 +60,32 @@ public:
     int width(){
         if(cells.size() == 0) return 0;
         return cells[0].size();
+    }
+    std::vector<Point> rightBoundary(){
+        std::vector<Point> res;
+        for(int i = 0; i < height(); i++){
+            int j = width() - 1;
+            while(cells[i][j] != Cell{Cell::Square})j--;
+            Point pt;
+            pt.row = i;
+            pt.col = j;
+            
+            res.push_back(pt);
+        }
+        return res;
+    }
+    
+    std::vector<Point> bottomBoundary(){
+        std::vector<Point> res;
+        for(int i = 0; i < width(); i++){
+            int j = height() - 1;
+            while(j >= 0 && cells[j][i] != Cell{Cell::Square})j--;
+            Point pt;
+            pt.row = j;
+            pt.col = i;
+            res.push_back(pt);
+        }
+        return res;
     }
 };
 
@@ -126,6 +153,7 @@ enum Command {
     Right,
     Rotate,
     DownToBottom,
+    Up
 };
 
 class ActiveShape{
@@ -177,6 +205,7 @@ public:
     void joinSquare(const ActiveShape& as);
     void cleanSquare(const ActiveShape& as);
     void printScreen();
+    
 private:
     void print();
     bool canRemove(int row);
@@ -213,10 +242,12 @@ public:
 };
 
 class Game{
-   ;
 public:
     ShapeType randomShape();
 public:
+    void adjustAfterRotate(){
+        
+    }
     bool response(MainScreen &ms,ActiveShape& as, Command cmd);
     void run();
 };

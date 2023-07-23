@@ -13,15 +13,13 @@ using namespace std;
 
 int main() {
     MainScreen ms;
+    UserCommand uc(800000);
+    uc.generateCmds();
     Game game;
        while(true){
-           Point pt = ms.initShapePoint();
-           std::shared_ptr<Shape> shapes = createShape(Lineshape);
-           ActiveShape as(pt, shapes);
+           ActiveShape as(ms.initShapePoint(), createShape(Lineshape));
            ms.joinSquare(as);
            ms.printScreen();
-           UserCommand uc(500000);
-           uc.generateCmds();
            bool stop = false;
            while(!stop){
                Command cmd = uc.getCmd();

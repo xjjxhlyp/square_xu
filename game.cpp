@@ -187,10 +187,13 @@ void ActiveShape::responseCommand(Command cmd, int rightBoundary, int bottomBoun
             point.col++;
             break;
         case Rotate:
-            rotate(rightBoundary, bottomBoundary);
+            shape->rotate();
             break;
         case DownToBottom:
             downToBottom(bottomBoundary);
+            break;
+        case Up:
+            point.row--;
             break;
     }
 }
@@ -286,7 +289,7 @@ bool Game::response(MainScreen &ms,ActiveShape& as, Command cmd){
 
 void Game::run(){
     MainScreen ms;
-    UserCommand uc(500000);
+    UserCommand uc(800000);
     uc.generateCmds();
     ms.printScreen();
 }
