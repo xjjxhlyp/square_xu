@@ -15,6 +15,8 @@
 #include <thread>
 #include <unistd.h>
 #include <string>
+#include <queue>
+#include <condition_variable>
 class Cell {
 public:
     enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
@@ -134,40 +136,25 @@ private:
     std::shared_ptr<Shape> lastShape;
 public:
     ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt){}
-    void move(Command cmd, int right, int bottom){
-        lastPoint = point;
-        lastShape = shape;
-        switch(cmd) {
-            case Down:
-                point.row++;
-                break;
-            case Left:
-                point.col--;
-                break;
-            case Right:
-                point.col++;
-                break;
-            case Rotate:
-                shape->rotate();
-                while(point.col >= right - shape->width()) point.col--;
-                while(point.row >= bottom - shape->height()) point.row--;
-                break;
-            case DownToBottom:
-                while(point.row < bottom - shape->height() - 1) point.row++;
-                break;
-        }
+    void rotate(int rightBoundary, int bottomBoundary){
+        shape->rotate();
+        while(point.col + shape->width()>= rightBoundary) point.col--;
+        while(point.row + shape->height()>= bottomBoundary) point.row--;
     }
     
+    void downToBottom(int bottomBoundary){
+        while(point.row + shape->height()< bottomBoundary  - 1) point.row++;
+    }
+    void responseCommand(Command cmd, int rightBoundary, int bottomBoundary);
     void rollback(){
         point = lastPoint;
         shape = lastShape;
     }
-    
     std::vector<Point> activePoints() const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
 };
 
-class MainScene {
+class MainScreen {
 private:
     const int CellNumberPerRow = 12;
     const int CellNumberPerCol = 22;
@@ -175,7 +162,7 @@ private:
     const int initCol = 4;
 public:
     std::vector<std::vector<Cell>> cells;
-    MainScene();
+    MainScreen();
     Point initShapePoint(){
         Point pt;
         pt.row = initRow;
@@ -199,27 +186,35 @@ std::shared_ptr<Shape> createShape(ShapeType shapeType);
 class UserCommand{
 private:
     std::mutex mtx;
-    Command cmd;
+    std::condition_variable cv;
+    std::queue<Command> cmds;
+    
+    int micro_seconds;
+    std::mutex mtx_sleep;
 private:
     char getchar_no_output();
     void receiveCommand();
-public:
-    UserCommand(){
-        cmd = Unknown;
-    }
-    Command getCmd();
-    void beginReceiveCmd(){
-        std::thread th(&UserCommand::receiveCommand, this);
-        th.detach();
-    }
     Command transformInputToCommand(char ch);
+    void downPeriodly();
+public:
+    UserCommand(int period):micro_seconds(period){};
+    Command getCmd();
+    void generateCmds();
+    void changeDownPeriod(int downPeriod){
+        std::unique_lock<std::mutex> ulPeriod(mtx_sleep);
+        micro_seconds = downPeriod;
+    }
+    int getDownPeriod(){
+        std::unique_lock<std::mutex> ulPeriod(mtx_sleep);
+        return micro_seconds;
+    }
 };
 
 class Game{
 public:
     ShapeType randomShape();
 public:
-    void move(MainScene& ms, ActiveShape& as, Command cmd);
+    void response(MainScreen& ms, ActiveShape& as, Command cmd);
     void run();
 };
 #endif /* game_hpp */
