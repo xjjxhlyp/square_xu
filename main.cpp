@@ -23,9 +23,9 @@ int main() {
            UserCommand uc(500000);
            uc.generateCmds();
            bool stop = false;
-           while(!stop ){
+           while(!stop){
                Command cmd = uc.getCmd();
-               game.response(ms, as, cmd);
+               stop = game.response(ms, as, cmd);
                ms.printScreen();
            }
        }

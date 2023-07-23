@@ -45,14 +45,16 @@ MainScreen::MainScreen() {
     }
     cells.back() = std::vector<Cell>(CellNumberPerRow, Cell{Cell::BottomBoundary});
 }
-
-bool MainScreen::canJoin(const ActiveShape& as){
-    if (!as.isInBoundaries(0,CellNumberPerCol,0, CellNumberPerRow)) return false;
+bool MainScreen::canJoinInner(const ActiveShape& as){
     std::vector<Point> vp = as.activePoints();
     for(int i = 0; i < vp.size(); i++){
         if(cells[vp[i].row][vp[i].col] == Cell{Cell::Square}) return false;
     }
     return true;
+}
+
+bool MainScreen::canJoin(const ActiveShape& as){
+    return (as.isInBoundaries(0,CellNumberPerCol,0, CellNumberPerRow) && canJoinInner(as));
 }
 
 void MainScreen::joinSquare(const ActiveShape& as) {
@@ -268,13 +270,18 @@ ShapeType Game::randomShape(){
     return static_cast<ShapeType> (rand() % ShapeTypeTotal);
 }
 
-void Game::response(MainScreen& ms, ActiveShape& as, Command cmd){
+bool Game::response(MainScreen &ms,ActiveShape& as, Command cmd){
      ms.cleanSquare(as);
      as.responseCommand(cmd, ms.width(), ms.height());
-     if (!ms.canJoin(as)) {
+    bool res = false;
+     if(!ms.canJoin(as)){
          as.rollback();
+         if(cmd == Down) {
+             res = true;
+         }
      }
-     ms.joinSquare(as);
+    ms.joinSquare(as);
+    return res;
  }
 
 void Game::run(){

@@ -152,6 +152,7 @@ public:
     }
     std::vector<Point> activePoints() const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
+    
 };
 
 class MainScreen {
@@ -171,6 +172,7 @@ public:
     }
     int width() {return CellNumberPerRow;}
     int height() {return CellNumberPerCol;}
+    bool canJoinInner(const ActiveShape& as);
     bool canJoin(const ActiveShape& as);
     void joinSquare(const ActiveShape& as);
     void cleanSquare(const ActiveShape& as);
@@ -211,10 +213,11 @@ public:
 };
 
 class Game{
+   ;
 public:
     ShapeType randomShape();
 public:
-    void response(MainScreen& ms, ActiveShape& as, Command cmd);
+    bool response(MainScreen &ms,ActiveShape& as, Command cmd);
     void run();
 };
 #endif /* game_hpp */
