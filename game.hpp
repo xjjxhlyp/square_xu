@@ -136,7 +136,6 @@ private:
     std::shared_ptr<Shape> lastShape;
 public:
     ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt){}
-    
     void rotate(int rightBoundary, int bottomBoundary){
         shape->rotate();
         while(point.col + shape->width()>= rightBoundary) point.col--;
@@ -146,33 +145,11 @@ public:
     void downToBottom(int bottomBoundary){
         while(point.row + shape->height()< bottomBoundary  - 1) point.row++;
     }
-    void responseCommand(Command cmd, int rightBoundary, int bottomBoundary){
-        lastPoint = point;
-        lastShape = shape;
-        switch(cmd) {
-            case Down:
-                point.row++;
-                break;
-            case Left:
-                point.col--;
-                break;
-            case Right:
-                point.col++;
-                break;
-            case Rotate:
-                rotate(rightBoundary, bottomBoundary);
-                break;
-            case DownToBottom:
-                downToBottom(bottomBoundary);
-                break;
-        }
-    }
-    
+    void responseCommand(Command cmd, int rightBoundary, int bottomBoundary);
     void rollback(){
         point = lastPoint;
         shape = lastShape;
     }
-    
     std::vector<Point> activePoints() const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
 };
@@ -211,26 +188,33 @@ private:
     std::mutex mtx;
     std::condition_variable cv;
     std::queue<Command> cmds;
+    
+    int micro_seconds;
+    std::mutex mtx_sleep;
 private:
     char getchar_no_output();
     void receiveCommand();
-public:
-    Command getCmd();
-    void beginReceiveCmd(){
-        std::thread th(&UserCommand::receiveCommand, this);
-        th.detach();
-    }
     Command transformInputToCommand(char ch);
+    void downPeriodly();
+public:
+    UserCommand(int period):micro_seconds(period){};
+    Command getCmd();
+    void generateCmds();
+    void changeDownPeriod(int downPeriod){
+        std::unique_lock<std::mutex> ulPeriod(mtx_sleep);
+        micro_seconds = downPeriod;
+    }
+    int getDownPeriod(){
+        std::unique_lock<std::mutex> ulPeriod(mtx_sleep);
+        return micro_seconds;
+    }
 };
 
 class Game{
-
 public:
     ShapeType randomShape();
 public:
     void response(MainScreen& ms, ActiveShape& as, Command cmd);
-    
-    
     void run();
 };
 #endif /* game_hpp */

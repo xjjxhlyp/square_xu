@@ -171,6 +171,28 @@ std::vector<Point> ActiveShape::activePoints() const{
     return res;
 }
 
+void ActiveShape::responseCommand(Command cmd, int rightBoundary, int bottomBoundary){
+    lastPoint = point;
+    lastShape = shape;
+    switch(cmd) {
+        case Down:
+            point.row++;
+            break;
+        case Left:
+            point.col--;
+            break;
+        case Right:
+            point.col++;
+            break;
+        case Rotate:
+            rotate(rightBoundary, bottomBoundary);
+            break;
+        case DownToBottom:
+            downToBottom(bottomBoundary);
+            break;
+    }
+}
+
 char UserCommand::getchar_no_output(){
     struct termios org_opts{};
     struct termios new_opts{};
@@ -215,6 +237,15 @@ void UserCommand::receiveCommand(){
     }
 }
 
+void UserCommand::downPeriodly(){
+    while(true){
+        usleep(getDownPeriod());
+        std::unique_lock<std::mutex> ul(mtx);
+        cmds.push(Down);
+        cv.notify_one();
+    }
+}
+
 Command UserCommand::getCmd(){
     Command res = Unknown;
     std::unique_lock<std::mutex> ul(mtx);
@@ -224,6 +255,13 @@ Command UserCommand::getCmd(){
     res = cmds.front();
     cmds.pop();
     return res;
+}
+
+void UserCommand::generateCmds(){
+    std::thread th(&UserCommand::receiveCommand, this);
+    th.detach();
+    std::thread thPeriod(&UserCommand::downPeriodly, this);
+    thPeriod.detach();
 }
 
 ShapeType Game::randomShape(){
@@ -241,7 +279,7 @@ void Game::response(MainScreen& ms, ActiveShape& as, Command cmd){
 
 void Game::run(){
     MainScreen ms;
-    UserCommand uc;
-    uc.beginReceiveCmd();
+    UserCommand uc(500000);
+    uc.generateCmds();
     ms.printScreen();
 }

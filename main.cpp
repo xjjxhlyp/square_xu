@@ -20,8 +20,8 @@ int main() {
            ActiveShape as(pt, shapes);
            ms.joinSquare(as);
            ms.printScreen();
-           UserCommand uc;
-           uc.beginReceiveCmd();
+           UserCommand uc(500000);
+           uc.generateCmds();
            bool stop = false;
            while(!stop ){
                Command cmd = uc.getCmd();
