@@ -145,9 +145,7 @@ std::vector<Point> Shape::points(){
     std::vector<Point> res;
     for(int i = 0; i < cells.size(); i++){
         for(int j = 0; j < cells[i].size(); j++){
-            Point temp;
-            temp.row = i;
-            temp.col = j;
+            Point temp(i, j);
             if(cells[i][j] == Cell{Cell::Square}) res.push_back(temp);
         }
     }
@@ -173,7 +171,7 @@ std::vector<Point> ActiveShape::activePoints() const{
     return res;
 }
 
-void ActiveShape::responseCommand(Command cmd, int rightBoundary, int bottomBoundary){
+void ActiveShape::responseCommand(Command cmd){
     lastPoint = point;
     lastShape = shape;
     switch(cmd) {
@@ -189,9 +187,9 @@ void ActiveShape::responseCommand(Command cmd, int rightBoundary, int bottomBoun
         case Rotate:
             shape->rotate();
             break;
-        case DownToBottom:
+        /*case DownToBottom:
             downToBottom(bottomBoundary);
-            break;
+            break;*/
         case Up:
             point.row--;
             break;
@@ -275,7 +273,10 @@ ShapeType Game::randomShape(){
 
 bool Game::response(MainScreen &ms,ActiveShape& as, Command cmd){
      ms.cleanSquare(as);
-     as.responseCommand(cmd, ms.width(), ms.height());
+     as.responseCommand(cmd);
+    if(cmd == Rotate){
+        adjustAfterRotate(ms, as);
+    }
     bool res = false;
      if(!ms.canJoin(as)){
          as.rollback();

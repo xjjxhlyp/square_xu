@@ -44,6 +44,7 @@ enum ShapeType{
 struct Point{
     int row;
     int col;
+    Point(int r, int c): row(r), col(c) {}
 };
 
 class Shape{
@@ -66,11 +67,7 @@ public:
         for(int i = 0; i < height(); i++){
             int j = width() - 1;
             while(cells[i][j] != Cell{Cell::Square})j--;
-            Point pt;
-            pt.row = i;
-            pt.col = j;
-            
-            res.push_back(pt);
+            res.push_back(Point(i, j));
         }
         return res;
     }
@@ -79,11 +76,10 @@ public:
         std::vector<Point> res;
         for(int i = 0; i < width(); i++){
             int j = height() - 1;
-            while(j >= 0 && cells[j][i] != Cell{Cell::Square})j--;
-            Point pt;
-            pt.row = j;
-            pt.col = i;
-            res.push_back(pt);
+            while(j >= 0 && cells[j][i] != Cell{Cell::Square}) {
+                j--;
+            }
+            res.push_back(Point(j, i));
         }
         return res;
     }
@@ -164,22 +160,22 @@ private:
     std::shared_ptr<Shape> lastShape;
 public:
     ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt){}
-    void rotate(int rightBoundary, int bottomBoundary){
-        shape->rotate();
-        while(point.col + shape->width()>= rightBoundary) point.col--;
-        while(point.row + shape->height()>= bottomBoundary) point.row--;
-    }
-    
-    void downToBottom(int bottomBoundary){
-        while(point.row + shape->height()< bottomBoundary  - 1) point.row++;
-    }
-    void responseCommand(Command cmd, int rightBoundary, int bottomBoundary);
+    void responseCommand(Command cmd);
     void rollback(){
         point = lastPoint;
         shape = lastShape;
     }
     std::vector<Point> activePoints() const;
+    
+    std::vector<Point> bottomBoundary(){
+        return shape->bottomBoundary();
+    }
+    std::vector<Point> rightBoundary(){
+        return shape->rightBoundary();
+    }
     bool isInBoundaries(int top, int bottom, int left, int right) const;
+    int height(){return shape->height();}
+    int width() {return shape->width();}
     
 };
 
@@ -193,10 +189,7 @@ public:
     std::vector<std::vector<Cell>> cells;
     MainScreen();
     Point initShapePoint(){
-        Point pt;
-        pt.row = initRow;
-        pt.col = initCol;
-        return pt;
+        return Point(initRow, initCol);
     }
     int width() {return CellNumberPerRow;}
     int height() {return CellNumberPerCol;}
@@ -204,6 +197,12 @@ public:
     bool canJoin(const ActiveShape& as);
     void joinSquare(const ActiveShape& as);
     void cleanSquare(const ActiveShape& as);
+    bool canJoinByBoundary(const std::vector<Point>& bottom){
+        for (int i = 0; i < bottom.size(); i++) {
+            if(cells[bottom[i].row][bottom[i].col] == Cell{Cell::Square}) return false;
+        }
+        return true;
+    }
     void printScreen();
     
 private:
@@ -245,9 +244,23 @@ class Game{
 public:
     ShapeType randomShape();
 public:
-    void adjustAfterRotate(){
+    void adjustAfterRotate(MainScreen &ms, ActiveShape& as){
+        int cnt = abs(as.width() - as.height()); //
+        int k = cnt;
+        
+        while(k > 0 && !ms.canJoinByBoundary(as.rightBoundary())){
+            as.responseCommand(Left);
+            k--;
+        }
+        
+        k = cnt;
+        while(k > 0 && !ms.canJoinByBoundary(as.bottomBoundary())){
+            as.responseCommand(Up);
+            k--;
+        }
         
     }
+    
     bool response(MainScreen &ms,ActiveShape& as, Command cmd);
     void run();
 };
