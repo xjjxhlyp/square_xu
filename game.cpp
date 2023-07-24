@@ -45,15 +45,18 @@ MainScreen::MainScreen() {
     }
     cells.back() = std::vector<Cell>(CellNumberPerRow, Cell{Cell::BottomBoundary});
 }
-
-bool MainScreen::canJoin(const ActiveShape& as){
-    if (!as.isInBoundaries(0,CellNumberPerCol,0, CellNumberPerRow)) return false;
+bool MainScreen::canJoinInner(const ActiveShape& as){
     std::vector<Point> vp = as.activePoints();
     for(int i = 0; i < vp.size(); i++){
         if(cells[vp[i].row][vp[i].col] == Cell{Cell::Square}) return false;
     }
     return true;
 }
+
+bool MainScreen::canJoin(const ActiveShape& as){
+    return (as.isInBoundaries(0,CellNumberPerCol-1,0, CellNumberPerRow-1) && canJoinInner(as));
+}
+
 
 void MainScreen::joinSquare(const ActiveShape& as) {
     if(!canJoin(as)) return;
@@ -63,23 +66,22 @@ void MainScreen::joinSquare(const ActiveShape& as) {
     }
 }
 
-void MainScreen::cleanSquare(const ActiveShape& as){
+void MainScreen::printScreen(const ActiveShape& as){
+    auto currCells = cells;
+    
+    // join as
     std::vector<Point> vp = as.activePoints();
     for (int i = 0; i < vp.size(); i++) {
-        cells[vp[i].row][vp[i].col] = Cell{Cell::Space};
+        currCells[vp[i].row][vp[i].col] = Cell{Cell::Square};
     }
-}
-
-void MainScreen::print() {
+    
+    // print currCelles
     for (int i = 0; i < CellNumberPerCol; i++) {
         for (int j = 0; j < CellNumberPerRow; j++) {
-            std::cout << cells[i][j];
+            std::cout << currCells[i][j];
         }
         std::cout << std::endl;
     }
-}
-void MainScreen::printScreen(){
-    print();
     std::cout << std::endl;
     printf("\033[23A");//\033表示光标向上移动；23表示上移23行
 }
@@ -124,7 +126,9 @@ std::shared_ptr<Shape> createShape(ShapeType shapeType){
 }
 
 void Shape::rotate(){
+    lastCells = cells;
     std::vector<std::vector<Cell>> res;
+    //把列转化为行
     for(int j = 0; j < cells[0].size(); j++){
         std::vector<Cell> temp;
         for(int i = 0; i < cells.size(); i++){
@@ -132,9 +136,9 @@ void Shape::rotate(){
         }
         res.push_back(temp);
     }
-    int i = 0, j = res.size()-1;
-    while(i < j){
-        swap(res[i++],res[j--]);
+    
+    for(int i = 0; i < res.size(); i++){
+        reverse(res[i].begin(), res[i].end());
     }
     cells = res;
 }
@@ -143,20 +147,19 @@ std::vector<Point> Shape::points(){
     std::vector<Point> res;
     for(int i = 0; i < cells.size(); i++){
         for(int j = 0; j < cells[i].size(); j++){
-            Point temp;
-            temp.row = i;
-            temp.col = j;
-            if(cells[i][j] == Cell{Cell::Square}) res.push_back(temp);
+            if(cells[i][j] == Cell{Cell::Square}) {
+                res.push_back(Point(i, j));
+            }
         }
     }
     return res;
 }
 
-bool ActiveShape::isInBoundaries(int top, int bottom, int left, int right) const{
-    if(point.row <= top || point.row >= bottom - shape->height()){
+bool ActiveShape::isInBoundaries(int topIdx, int bottomIdx, int leftIdx, int rightIdx) const{
+    if(point.row <= topIdx || point.row + shape->height() > bottomIdx){ // idx + size是迭代器中end的概念，end 是无效的，可以等于bottom。
         return false;
     }
-    if(point.col <= left || point.col >= right - shape->width()){
+    if(point.col <= leftIdx || point.col + shape->width() > rightIdx){
         return false;
     }
     return true;
@@ -171,9 +174,8 @@ std::vector<Point> ActiveShape::activePoints() const{
     return res;
 }
 
-void ActiveShape::responseCommand(Command cmd, int rightBoundary, int bottomBoundary){
-    lastPoint = point;
-    lastShape = shape;
+void ActiveShape::responseCommand(Command cmd){
+        lastPoint = point;
     switch(cmd) {
         case Down:
             point.row++;
@@ -185,11 +187,11 @@ void ActiveShape::responseCommand(Command cmd, int rightBoundary, int bottomBoun
             point.col++;
             break;
         case Rotate:
-            rotate(rightBoundary, bottomBoundary);
+            shape->rotate();
             break;
-        case DownToBottom:
+        /*case DownToBottom:
             downToBottom(bottomBoundary);
-            break;
+            break;*/
     }
 }
 
@@ -268,18 +270,20 @@ ShapeType Game::randomShape(){
     return static_cast<ShapeType> (rand() % ShapeTypeTotal);
 }
 
-void Game::response(MainScreen& ms, ActiveShape& as, Command cmd){
-     ms.cleanSquare(as);
-     as.responseCommand(cmd, ms.width(), ms.height());
-     if (!ms.canJoin(as)) {
-         as.rollback();
+bool Game::response(MainScreen &ms,ActiveShape& as, Command cmd){
+     as.responseCommand(cmd);
+     bool res = false;
+     if(!ms.canJoin(as)){
+         as.rollback(cmd);
+         if(cmd == Down) {
+             res = true;
+         }
      }
-     ms.joinSquare(as);
+    return res;
  }
 
 void Game::run(){
     MainScreen ms;
-    UserCommand uc(500000);
+    UserCommand uc(800000);
     uc.generateCmds();
-    ms.printScreen();
 }

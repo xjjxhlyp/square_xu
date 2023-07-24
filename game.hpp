@@ -21,9 +21,11 @@ class Cell {
 public:
     enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
     Cell(CellType t): type(t) {}
+    
     bool canJoin(const Cell& cell) {return (this->type == Space || cell.type == Space);}
     friend std::ostream& operator<<(std::ostream& out, Cell& cell);
-    friend bool operator==(const Cell& cell1, const Cell& cell2) {return cell1.type == cell2.type;}
+    bool operator==(const Cell& cell2) {return type == cell2.type;}
+    bool operator!=(const Cell& cell2) {return type != cell2.type;}
 private:
     CellType type;
 };
@@ -43,23 +45,27 @@ enum ShapeType{
 struct Point{
     int row;
     int col;
+    Point(int r, int c): row(r), col(c) {}
 };
 
 class Shape{
 private:
     std::vector<std::vector<Cell>> cells;
+    std::vector<std::vector<Cell>> lastCells;
 protected://只有子类可见
     Shape(std::vector<std::vector<Cell>> squares){
         cells = squares;
     }
 public:
     void rotate();
+    void rollbackAfterRotate(){cells = lastCells;};
     std::vector<Point> points();
-    int height(){return cells.size();}
+    int height(){return (int)cells.size();}
     int width(){
         if(cells.size() == 0) return 0;
-        return cells[0].size();
+        return (int)cells[0].size();
     }
+    
 };
 
 class SquareShape : public Shape{
@@ -125,33 +131,29 @@ enum Command {
     Left,
     Right,
     Rotate,
-    DownToBottom,
+    DownToBottom
 };
 
 class ActiveShape{
 private:
     Point point;
     std::shared_ptr<Shape> shape;
+    
     Point lastPoint;
     std::shared_ptr<Shape> lastShape;
 public:
-    ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt){}
-    void rotate(int rightBoundary, int bottomBoundary){
-        shape->rotate();
-        while(point.col + shape->width()>= rightBoundary) point.col--;
-        while(point.row + shape->height()>= bottomBoundary) point.row--;
-    }
-    
-    void downToBottom(int bottomBoundary){
-        while(point.row + shape->height()< bottomBoundary  - 1) point.row++;
-    }
-    void responseCommand(Command cmd, int rightBoundary, int bottomBoundary);
-    void rollback(){
+    ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt),lastShape(shapes){}
+    void responseCommand(Command cmd);
+    void rollback(Command cmd){
         point = lastPoint;
-        shape = lastShape;
+        if(cmd == Rotate){
+            shape->rollbackAfterRotate();
+        }
     }
     std::vector<Point> activePoints() const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
+    
+    
 };
 
 class MainScreen {
@@ -163,20 +165,15 @@ private:
 public:
     std::vector<std::vector<Cell>> cells;
     MainScreen();
-    Point initShapePoint(){
-        Point pt;
-        pt.row = initRow;
-        pt.col = initCol;
-        return pt;
-    }
+    Point initShapePoint(){return Point(initRow, initCol);}
     int width() {return CellNumberPerRow;}
     int height() {return CellNumberPerCol;}
     bool canJoin(const ActiveShape& as);
     void joinSquare(const ActiveShape& as);
-    void cleanSquare(const ActiveShape& as);
-    void printScreen();
+    void printScreen(const ActiveShape& as);
+    
 private:
-    void print();
+    bool canJoinInner(const ActiveShape& as);
     bool canRemove(int row);
     void RemoveOneRow(int row);
 };
@@ -214,7 +211,7 @@ class Game{
 public:
     ShapeType randomShape();
 public:
-    void response(MainScreen& ms, ActiveShape& as, Command cmd);
+    bool response(MainScreen &ms,ActiveShape& as, Command cmd);
     void run();
 };
 #endif /* game_hpp */
