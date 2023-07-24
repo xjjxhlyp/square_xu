@@ -48,7 +48,7 @@ MainScreen::MainScreen() {
 bool MainScreen::canJoinInner(const ActiveShape& as){
     std::vector<Point> vp = as.activePoints();
     for(int i = 0; i < vp.size(); i++){
-        if(cells[vp[i].row][vp[i].col] == Cell{Cell::Square}) return false;
+        if(cells[vp[i].row][vp[i].col].isSquare()) return false;
     }
     return true;
 }
@@ -94,7 +94,7 @@ void MainScreen::printScreen(const ActiveShape& as){
 
 bool MainScreen::canRemove(int row){
     for(int i = 1; i < cells[i].size() - 1; i++){
-        if(cells[row][i] == Cell{Cell::Space}){
+        if(cells[row][i].isSpace()){
             return false;
         }
     }
@@ -104,30 +104,30 @@ bool MainScreen::canRemove(int row){
 void MainScreen::RemoveOneRow(int row){
     if(canRemove(row)){
         for(int i = 1; i < cells[i].size()-1; i++){
-            cells[row][i] = Cell{Cell::Space};
+            cells[row][i].set(Cell::Space);
         }
     }
 }
 
-std::shared_ptr<Shape> createShape(ShapeType shapeType){
+Shape createShape(ShapeType shapeType){
     switch(shapeType){
         case Square:
-            return std::shared_ptr<SquareShape> (new SquareShape());
+            return SquareShape();
         case Lineshape:
-            return std::shared_ptr<LineShape> (new LineShape());
+            return LineShape();
         case Tshape:
-            return std::shared_ptr<TShape> (new TShape());
+            return TShape();
         case LLshape:
-            return std::shared_ptr<LeftLShape> (new LeftLShape());
+            return LeftLShape();
         case RLshape:
-            return std::shared_ptr<RightLShape> (new RightLShape());
+            return RightLShape();
         case LZshape:
-            return std::shared_ptr<LeftZShape> (new LeftZShape());
+            return LeftZShape();
         case RZshape:
-            return std::shared_ptr<RightZShape> (new RightZShape());
+            return RightZShape();
         default:
             //要有默认值来处理其他情况，但是不能被用户感知到
-            return std::shared_ptr<SquareShape> (new SquareShape());
+            return  SquareShape();
     }
 }
 
@@ -149,11 +149,11 @@ void Shape::rotate(){
     cells = res;
 }
 
-std::vector<Point> Shape::points(){
+std::vector<Point> Shape::points() const{
     std::vector<Point> res;
     for(int i = 0; i < cells.size(); i++){
         for(int j = 0; j < cells[i].size(); j++){
-            if(cells[i][j] == Cell{Cell::Square}) {
+            if(cells[i][j].isSquare()) {
                 res.push_back(Point(i, j));
             }
         }
@@ -162,17 +162,17 @@ std::vector<Point> Shape::points(){
 }
 
 bool ActiveShape::isInBoundaries(int topIdx, int bottomIdx, int leftIdx, int rightIdx) const{
-    if(point.row <= topIdx || point.row + shape->height() > bottomIdx){ // idx + size是迭代器中end的概念，end 是无效的，可以等于bottom。
+    if(point.row <= topIdx || point.row + shape.height() > bottomIdx){ // idx + size是迭代器中end的概念，end 是无效的，可以等于bottom。
         return false;
     }
-    if(point.col <= leftIdx || point.col + shape->width() > rightIdx){
+    if(point.col <= leftIdx || point.col + shape.width() > rightIdx){
         return false;
     }
     return true;
 }
 
 std::vector<Point> ActiveShape::activePoints() const{
-    std::vector<Point> res = shape->points();
+    std::vector<Point> res = shape.points();
     for(int i = 0; i < res.size(); i++){
         res[i].row += point.row;
         res[i].col += point.col;
@@ -183,7 +183,7 @@ std::vector<Point> ActiveShape::activePoints() const{
 void ActiveShape::rollback(Command cmd){
     point = lastPoint;
     if(cmd == Rotate){
-        shape->rollbackAfterRotate();
+        shape = lastShape;
     }
 }
 void ActiveShape::responseCommand(Command cmd){
@@ -199,7 +199,7 @@ void ActiveShape::responseCommand(Command cmd){
             point.col++;
             break;
         case Rotate:
-            shape->rotate();
+            shape.rotate();
             break;
         default:
             break;

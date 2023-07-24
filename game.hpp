@@ -25,9 +25,12 @@ private:
     CellType type;
 public:
     bool canJoin(const Cell& cell) {return (this->type == Space || cell.type == Space);}
+    bool isSquare() const {return type == Square;}
+    bool isSpace() const {return type == Space;}
+    void set(const CellType& t) {type = t;}
     friend std::ostream& operator<<(std::ostream& out, Cell& cell);
-    bool operator==(const Cell& cell2) {return type == cell2.type;}
-    bool operator!=(const Cell& cell2) {return type != cell2.type;}
+    bool operator==(const Cell& cell2) const {return type == cell2.type;}
+    bool operator!=(const Cell& cell2) const {return type != cell2.type;}
 };
 
 //枚举也是一个类，是全局的，不能放在函数里边
@@ -56,10 +59,9 @@ protected://只有子类可见
     Shape(std::vector<std::vector<Cell>> squares){cells = squares;}
 public:
     void rotate();
-    void rollbackAfterRotate(){cells = lastCells;}
-    std::vector<Point> points();
-    int height(){return (int)cells.size();}
-    int width(){
+    std::vector<Point> points() const;
+    int height() const {return (int)cells.size();}
+    int width() const {
         if(cells.size() == 0) return 0;
         return (int)cells[0].size();
     }
@@ -135,15 +137,15 @@ enum Command {
 class ActiveShape{
 private:
     Point point;
-    std::shared_ptr<Shape> shape;
+    Shape shape;
     
     Point lastPoint;
-    std::shared_ptr<Shape> lastShape;
+    Shape lastShape;
 public:
-    ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt),lastShape(shapes){}
+    ActiveShape(Point pt, const Shape& shapes): point(pt), shape(shapes),lastPoint(pt),lastShape(shapes){}
     void responseCommand(Command cmd);
     void rollback(Command cmd);
-    std::vector<Point> activePoints() const;
+    std::vector<Point> activePoints()const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
 };
 
@@ -186,7 +188,7 @@ private:
     void RemoveOneRow(int row);
 };
 
-std::shared_ptr<Shape> createShape(ShapeType shapeType);
+Shape createShape(ShapeType shapeType);
 
 class UserCommand{
 private:

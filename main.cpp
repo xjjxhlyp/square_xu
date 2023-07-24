@@ -17,7 +17,7 @@ int main() {
     uc.generateCmds();
     Game game;
        while(true){
-           ActiveShape as(ms.initShapePoint(), createShape(game.randomShape()));
+           ActiveShape as(ms.initShapePoint(),createShape(game.randomShape()));
            ms.printScreen(as);
            bool stop = false;
            while(!stop){
