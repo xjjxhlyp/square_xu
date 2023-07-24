@@ -80,6 +80,12 @@ void MainScreen::printScreen(const ActiveShape& as){
         for (int j = 0; j < CellNumberPerRow; j++) {
             std::cout << currCells[i][j];
         }
+        if(i == scoresBegin){
+            printScore();
+        }
+        if(i == levelBegin){
+            printLevel();
+        }
         std::cout << std::endl;
     }
     std::cout << std::endl;

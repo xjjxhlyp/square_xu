@@ -151,8 +151,17 @@ class MainScreen {
 private:
     const int CellNumberPerRow = 12;
     const int CellNumberPerCol = 22;
+    
     const int initRow = 1;
     const int initCol = 4;
+    
+    const int nextBegin = 2;
+    const int scoresBegin = 10;
+    const int levelBegin = 15;
+    
+    int score = 0;
+    int level = 1;
+    
 public:
     std::vector<std::vector<Cell>> cells;
     MainScreen();
@@ -161,6 +170,24 @@ public:
     int height() {return CellNumberPerCol;}
     bool canJoin(const ActiveShape& as);
     void joinSquare(const ActiveShape& as);
+    void printScore(){
+        for(int i = 0; i < 2; i++){
+            std::cout << "  ";
+        }
+        std::cout << "scores : " << score;
+        for(int i = 0; i < 2; i++){
+            std::cout << "  ";
+        }
+    }
+    void printLevel(){
+        for(int i = 0; i < 2; i++){
+            std::cout << "  ";
+        }
+        std::cout << "level : " << level;
+        for(int i = 0; i < 2; i++){
+            std::cout << "  ";
+        }
+    }
     void printScreen(const ActiveShape& as);
     
 private:
