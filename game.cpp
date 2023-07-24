@@ -174,6 +174,12 @@ std::vector<Point> ActiveShape::activePoints() const{
     return res;
 }
 
+void ActiveShape::rollback(Command cmd){
+    point = lastPoint;
+    if(cmd == Rotate){
+        shape->rollbackAfterRotate();
+    }
+}
 void ActiveShape::responseCommand(Command cmd){
         lastPoint = point;
     switch(cmd) {
@@ -189,9 +195,9 @@ void ActiveShape::responseCommand(Command cmd){
         case Rotate:
             shape->rotate();
             break;
-        /*case DownToBottom:
-            downToBottom(bottomBoundary);
-            break;*/
+        case DownToBottom:
+            point.row++;
+            break;
     }
 }
 
@@ -270,8 +276,21 @@ ShapeType Game::randomShape(){
     return static_cast<ShapeType> (rand() % ShapeTypeTotal);
 }
 
+void Game::downToBottom(MainScreen &ms,ActiveShape& as){
+    while(ms.canJoin(as)){
+        as.responseCommand(Down);
+    }
+    as.rollback(Down);
+}
+
 bool Game::response(MainScreen &ms,ActiveShape& as, Command cmd){
-     as.responseCommand(cmd);
+    as.responseCommand(cmd);
+    //先处理悬空下落命令
+    if(cmd == DownToBottom){
+        downToBottom(ms, as);
+        return true;
+    }
+    //处理其他命令
      bool res = false;
      if(!ms.canJoin(as)){
          as.rollback(cmd);

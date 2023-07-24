@@ -21,13 +21,13 @@ class Cell {
 public:
     enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
     Cell(CellType t): type(t) {}
-    
+private:
+    CellType type;
+public:
     bool canJoin(const Cell& cell) {return (this->type == Space || cell.type == Space);}
     friend std::ostream& operator<<(std::ostream& out, Cell& cell);
     bool operator==(const Cell& cell2) {return type == cell2.type;}
     bool operator!=(const Cell& cell2) {return type != cell2.type;}
-private:
-    CellType type;
 };
 
 //枚举也是一个类，是全局的，不能放在函数里边
@@ -53,12 +53,10 @@ private:
     std::vector<std::vector<Cell>> cells;
     std::vector<std::vector<Cell>> lastCells;
 protected://只有子类可见
-    Shape(std::vector<std::vector<Cell>> squares){
-        cells = squares;
-    }
+    Shape(std::vector<std::vector<Cell>> squares){cells = squares;}
 public:
     void rotate();
-    void rollbackAfterRotate(){cells = lastCells;};
+    void rollbackAfterRotate(){cells = lastCells;}
     std::vector<Point> points();
     int height(){return (int)cells.size();}
     int width(){
@@ -144,16 +142,9 @@ private:
 public:
     ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt),lastShape(shapes){}
     void responseCommand(Command cmd);
-    void rollback(Command cmd){
-        point = lastPoint;
-        if(cmd == Rotate){
-            shape->rollbackAfterRotate();
-        }
-    }
+    void rollback(Command cmd);
     std::vector<Point> activePoints() const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
-    
-    
 };
 
 class MainScreen {
@@ -212,6 +203,7 @@ public:
     ShapeType randomShape();
 public:
     bool response(MainScreen &ms,ActiveShape& as, Command cmd);
+    void downToBottom(MainScreen &ms,ActiveShape& as);
     void run();
 };
 #endif /* game_hpp */
