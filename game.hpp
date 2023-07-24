@@ -51,39 +51,21 @@ struct Point{
 class Shape{
 private:
     std::vector<std::vector<Cell>> cells;
+    std::vector<std::vector<Cell>> lastCells;
 protected://只有子类可见
     Shape(std::vector<std::vector<Cell>> squares){
         cells = squares;
     }
 public:
     void rotate();
+    void rollbackAfterRotate(){cells = lastCells;};
     std::vector<Point> points();
     int height(){return (int)cells.size();}
     int width(){
         if(cells.size() == 0) return 0;
         return (int)cells[0].size();
     }
-    std::vector<Point> rightBoundary(){
-        std::vector<Point> res;
-        for(int i = 0; i < height(); i++){
-            int j = width() - 1;
-            while(cells[i][j] != Cell{Cell::Square})j--;
-            res.push_back(Point(i, j));
-        }
-        return res;
-    }
     
-    std::vector<Point> bottomBoundary(){
-        std::vector<Point> res;
-        for(int i = 0; i < (int)cells[0].size(); i++){
-            int j = (int)cells.size() - 1;
-            while(j >= 0 && cells[j][i] != Cell{Cell::Square}) {
-                j--;
-            }
-            res.push_back(Point(j, i));
-        }
-        return res;
-    }
 };
 
 class SquareShape : public Shape{
@@ -162,17 +144,15 @@ private:
 public:
     ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt),lastShape(shapes){}
     void responseCommand(Command cmd);
-    void rollback(){
+    void rollback(Command cmd){
         point = lastPoint;
-        shape = lastShape;
+        if(cmd == Rotate){
+            shape->rollbackAfterRotate();
+        }
     }
     std::vector<Point> activePoints() const;
-    
-    std::vector<Point> bottomBoundary();
-    std::vector<Point> rightBoundary();
     bool isInBoundaries(int top, int bottom, int left, int right) const;
-    int height(){return shape->height();}
-    int width() {return shape->width();}
+    
     
 };
 
@@ -180,24 +160,16 @@ class MainScreen {
 private:
     const int CellNumberPerRow = 12;
     const int CellNumberPerCol = 22;
-    const int initRow = 2;
-    const int initCol = 9;
+    const int initRow = 1;
+    const int initCol = 4;
 public:
     std::vector<std::vector<Cell>> cells;
     MainScreen();
-    Point initShapePoint(){
-        return Point(initRow, initCol);
-    }
+    Point initShapePoint(){return Point(initRow, initCol);}
     int width() {return CellNumberPerRow;}
     int height() {return CellNumberPerCol;}
     bool canJoin(const ActiveShape& as);
     void joinSquare(const ActiveShape& as);
-    bool canJoinByBoundary(const std::vector<Point>& bottom){
-        for (int i = 0; i < bottom.size(); i++) {
-            if(cells[bottom[i].row][bottom[i].col] != Cell{Cell::Space} ) return false;
-        }
-        return true;
-    }
     void printScreen(const ActiveShape& as);
     
 private:
@@ -239,8 +211,6 @@ class Game{
 public:
     ShapeType randomShape();
 public:
-    
-    
     bool response(MainScreen &ms,ActiveShape& as, Command cmd);
     void run();
 };

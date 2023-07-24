@@ -126,7 +126,9 @@ std::shared_ptr<Shape> createShape(ShapeType shapeType){
 }
 
 void Shape::rotate(){
+    lastCells = cells;
     std::vector<std::vector<Cell>> res;
+    //把列转化为行
     for(int j = 0; j < cells[0].size(); j++){
         std::vector<Cell> temp;
         for(int i = 0; i < cells.size(); i++){
@@ -134,9 +136,9 @@ void Shape::rotate(){
         }
         res.push_back(temp);
     }
-    int i = 0, j = res.size()-1;
-    while(i < j){
-        swap(res[i++],res[j--]);
+    
+    for(int i = 0; i < res.size(); i++){
+        reverse(res[i].begin(), res[i].end());
     }
     cells = res;
 }
@@ -149,7 +151,6 @@ std::vector<Point> Shape::points(){
                 res.push_back(Point(i, j));
             }
         }
-            
     }
     return res;
 }
@@ -175,7 +176,6 @@ std::vector<Point> ActiveShape::activePoints() const{
 
 void ActiveShape::responseCommand(Command cmd){
         lastPoint = point;
-        lastShape = shape;
     switch(cmd) {
         case Down:
             point.row++;
@@ -193,23 +193,6 @@ void ActiveShape::responseCommand(Command cmd){
             downToBottom(bottomBoundary);
             break;*/
     }
-}
-
-std::vector<Point> ActiveShape::bottomBoundary(){
-    auto shapeBoundary = shape->bottomBoundary();
-    for_each(shapeBoundary.begin(), shapeBoundary.end(), [this](Point& val) {
-        val.row += point.row;
-    });
-    return shapeBoundary;
-    
-}
-std::vector<Point> ActiveShape::rightBoundary(){
-    auto shapeBoundary = shape->rightBoundary();
-    for (Point& v : shapeBoundary) {
-        v.col += point.col;
-    }
-    return shapeBoundary;
-    
 }
 
 char UserCommand::getchar_no_output(){
@@ -291,7 +274,7 @@ bool Game::response(MainScreen &ms,ActiveShape& as, Command cmd){
      as.responseCommand(cmd);
      bool res = false;
      if(!ms.canJoin(as)){
-         as.rollback();
+         as.rollback(cmd);
          if(cmd == Down) {
              res = true;
          }
