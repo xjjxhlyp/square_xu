@@ -201,8 +201,7 @@ void ActiveShape::responseCommand(Command cmd){
         case Rotate:
             shape->rotate();
             break;
-        case DownToBottom:
-            point.row++;
+        default:
             break;
     }
 }
