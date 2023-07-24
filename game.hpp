@@ -21,6 +21,7 @@ class Cell {
 public:
     enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
     Cell(CellType t): type(t) {}
+    
     bool canJoin(const Cell& cell) {return (this->type == Space || cell.type == Space);}
     friend std::ostream& operator<<(std::ostream& out, Cell& cell);
     bool operator==(const Cell& cell2) {return type == cell2.type;}
@@ -57,10 +58,10 @@ protected://只有子类可见
 public:
     void rotate();
     std::vector<Point> points();
-    int height(){return cells.size();}
+    int height(){return (int)cells.size();}
     int width(){
         if(cells.size() == 0) return 0;
-        return cells[0].size();
+        return (int)cells[0].size();
     }
     std::vector<Point> rightBoundary(){
         std::vector<Point> res;
@@ -74,8 +75,8 @@ public:
     
     std::vector<Point> bottomBoundary(){
         std::vector<Point> res;
-        for(int i = 0; i < width(); i++){
-            int j = height() - 1;
+        for(int i = 0; i < (int)cells[0].size(); i++){
+            int j = (int)cells.size() - 1;
             while(j >= 0 && cells[j][i] != Cell{Cell::Square}) {
                 j--;
             }
@@ -148,18 +149,18 @@ enum Command {
     Left,
     Right,
     Rotate,
-    DownToBottom,
-    Up
+    DownToBottom
 };
 
 class ActiveShape{
 private:
     Point point;
     std::shared_ptr<Shape> shape;
+    
     Point lastPoint;
     std::shared_ptr<Shape> lastShape;
 public:
-    ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt){}
+    ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt),lastShape(shapes){}
     void responseCommand(Command cmd);
     void rollback(){
         point = lastPoint;
@@ -167,12 +168,8 @@ public:
     }
     std::vector<Point> activePoints() const;
     
-    std::vector<Point> bottomBoundary(){
-        return shape->bottomBoundary();
-    }
-    std::vector<Point> rightBoundary(){
-        return shape->rightBoundary();
-    }
+    std::vector<Point> bottomBoundary();
+    std::vector<Point> rightBoundary();
     bool isInBoundaries(int top, int bottom, int left, int right) const;
     int height(){return shape->height();}
     int width() {return shape->width();}
@@ -183,8 +180,8 @@ class MainScreen {
 private:
     const int CellNumberPerRow = 12;
     const int CellNumberPerCol = 22;
-    const int initRow = 1;
-    const int initCol = 4;
+    const int initRow = 2;
+    const int initCol = 9;
 public:
     std::vector<std::vector<Cell>> cells;
     MainScreen();
@@ -193,20 +190,18 @@ public:
     }
     int width() {return CellNumberPerRow;}
     int height() {return CellNumberPerCol;}
-    bool canJoinInner(const ActiveShape& as);
     bool canJoin(const ActiveShape& as);
     void joinSquare(const ActiveShape& as);
-    void cleanSquare(const ActiveShape& as);
     bool canJoinByBoundary(const std::vector<Point>& bottom){
         for (int i = 0; i < bottom.size(); i++) {
-            if(cells[bottom[i].row][bottom[i].col] == Cell{Cell::Square}) return false;
+            if(cells[bottom[i].row][bottom[i].col] != Cell{Cell::Space} ) return false;
         }
         return true;
     }
-    void printScreen();
+    void printScreen(const ActiveShape& as);
     
 private:
-    void print();
+    bool canJoinInner(const ActiveShape& as);
     bool canRemove(int row);
     void RemoveOneRow(int row);
 };
@@ -244,22 +239,7 @@ class Game{
 public:
     ShapeType randomShape();
 public:
-    void adjustAfterRotate(MainScreen &ms, ActiveShape& as){
-        int cnt = abs(as.width() - as.height()); //
-        int k = cnt;
-        
-        while(k > 0 && !ms.canJoinByBoundary(as.rightBoundary())){
-            as.responseCommand(Left);
-            k--;
-        }
-        
-        k = cnt;
-        while(k > 0 && !ms.canJoinByBoundary(as.bottomBoundary())){
-            as.responseCommand(Up);
-            k--;
-        }
-        
-    }
+    
     
     bool response(MainScreen &ms,ActiveShape& as, Command cmd);
     void run();

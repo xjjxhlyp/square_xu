@@ -54,8 +54,9 @@ bool MainScreen::canJoinInner(const ActiveShape& as){
 }
 
 bool MainScreen::canJoin(const ActiveShape& as){
-    return (as.isInBoundaries(0,CellNumberPerCol,0, CellNumberPerRow) && canJoinInner(as));
+    return (as.isInBoundaries(0,CellNumberPerCol-1,0, CellNumberPerRow-1) && canJoinInner(as));
 }
+
 
 void MainScreen::joinSquare(const ActiveShape& as) {
     if(!canJoin(as)) return;
@@ -65,23 +66,22 @@ void MainScreen::joinSquare(const ActiveShape& as) {
     }
 }
 
-void MainScreen::cleanSquare(const ActiveShape& as){
+void MainScreen::printScreen(const ActiveShape& as){
+    auto currCells = cells;
+    
+    // join as
     std::vector<Point> vp = as.activePoints();
     for (int i = 0; i < vp.size(); i++) {
-        cells[vp[i].row][vp[i].col] = Cell{Cell::Space};
+        currCells[vp[i].row][vp[i].col] = Cell{Cell::Square};
     }
-}
-
-void MainScreen::print() {
+    
+    // print currCelles
     for (int i = 0; i < CellNumberPerCol; i++) {
         for (int j = 0; j < CellNumberPerRow; j++) {
-            std::cout << cells[i][j];
+            std::cout << currCells[i][j];
         }
         std::cout << std::endl;
     }
-}
-void MainScreen::printScreen(){
-    print();
     std::cout << std::endl;
     printf("\033[23A");//\033表示光标向上移动；23表示上移23行
 }
@@ -145,18 +145,20 @@ std::vector<Point> Shape::points(){
     std::vector<Point> res;
     for(int i = 0; i < cells.size(); i++){
         for(int j = 0; j < cells[i].size(); j++){
-            Point temp(i, j);
-            if(cells[i][j] == Cell{Cell::Square}) res.push_back(temp);
+            if(cells[i][j] == Cell{Cell::Square}) {
+                res.push_back(Point(i, j));
+            }
         }
+            
     }
     return res;
 }
 
-bool ActiveShape::isInBoundaries(int top, int bottom, int left, int right) const{
-    if(point.row <= top || point.row >= bottom - shape->height()){
+bool ActiveShape::isInBoundaries(int topIdx, int bottomIdx, int leftIdx, int rightIdx) const{
+    if(point.row <= topIdx || point.row + shape->height() > bottomIdx){ // idx + size是迭代器中end的概念，end 是无效的，可以等于bottom。
         return false;
     }
-    if(point.col <= left || point.col >= right - shape->width()){
+    if(point.col <= leftIdx || point.col + shape->width() > rightIdx){
         return false;
     }
     return true;
@@ -172,8 +174,8 @@ std::vector<Point> ActiveShape::activePoints() const{
 }
 
 void ActiveShape::responseCommand(Command cmd){
-    lastPoint = point;
-    lastShape = shape;
+        lastPoint = point;
+        lastShape = shape;
     switch(cmd) {
         case Down:
             point.row++;
@@ -190,10 +192,24 @@ void ActiveShape::responseCommand(Command cmd){
         /*case DownToBottom:
             downToBottom(bottomBoundary);
             break;*/
-        case Up:
-            point.row--;
-            break;
     }
+}
+
+std::vector<Point> ActiveShape::bottomBoundary(){
+    auto shapeBoundary = shape->bottomBoundary();
+    for_each(shapeBoundary.begin(), shapeBoundary.end(), [this](Point& val) {
+        val.row += point.row;
+    });
+    return shapeBoundary;
+    
+}
+std::vector<Point> ActiveShape::rightBoundary(){
+    auto shapeBoundary = shape->rightBoundary();
+    for (Point& v : shapeBoundary) {
+        v.col += point.col;
+    }
+    return shapeBoundary;
+    
 }
 
 char UserCommand::getchar_no_output(){
@@ -272,19 +288,14 @@ ShapeType Game::randomShape(){
 }
 
 bool Game::response(MainScreen &ms,ActiveShape& as, Command cmd){
-     ms.cleanSquare(as);
      as.responseCommand(cmd);
-    if(cmd == Rotate){
-        adjustAfterRotate(ms, as);
-    }
-    bool res = false;
+     bool res = false;
      if(!ms.canJoin(as)){
          as.rollback();
          if(cmd == Down) {
              res = true;
          }
      }
-    ms.joinSquare(as);
     return res;
  }
 
@@ -292,5 +303,4 @@ void Game::run(){
     MainScreen ms;
     UserCommand uc(800000);
     uc.generateCmds();
-    ms.printScreen();
 }
