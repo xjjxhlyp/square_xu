@@ -16,19 +16,21 @@ int main() {
     UserCommand uc(800000);
     uc.generateCmds();
     Game game;
-    ActiveShape currAs(ms.initShapePoint(),createShape(game.randomShape()));
-       while(true){
-           ActiveShape nextAs(ms.initShapePoint(),createShape(game.randomShape()));
-           ms.printScreen(currAs, nextAs);
-           bool stop = false;
-           while(!stop){
-               Command cmd = uc.getCmd();
-               stop = game.response(ms, currAs, cmd);
-               ms.printScreen(currAs, nextAs);
-           }
-           ms.joinSquare(currAs);
-           currAs = nextAs;
-       }
+    ActiveShape currAs(ms.initShapePoint(),createShape(Lineshape));
+    while(true){
+        ActiveShape nextAs(ms.initShapePoint(),createShape(Lineshape));
+        ms.printScreen(currAs, nextAs);
+        bool stop = false;
+        while(!stop){
+            Command cmd = uc.getCmd();
+            stop = game.response(ms, currAs, cmd);
+            ms.printScreen(currAs, nextAs);
+        }
+        ms.joinSquare(currAs);
+        ms.remove();
+        ms.printScreen(currAs, nextAs);
+        currAs = nextAs;
+    }
     return 0;
 }
 
