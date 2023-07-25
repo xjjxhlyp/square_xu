@@ -181,8 +181,7 @@ private:
     void joinActiveShape(std::vector<std::vector<Cell>>& cells, const std::vector<Point>& p, Point point);
     bool canJoinInner(const ActiveShape& as);
     bool rowCanRemove(int row);
-    void removeOneRow(int row);
-    void upRowsMoveDown(int row);
+    void aboveCellsFall(int row);
     
 };
 

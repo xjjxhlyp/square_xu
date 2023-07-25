@@ -118,32 +118,26 @@ bool MainScreen::rowCanRemove(int row){
     return true;
 }
 
-void MainScreen::removeOneRow(int row){
-    for(int i = 1; i < ColNumbers-1; i++){
-        cells[row][i].set(Cell::Space);
-    }
-}
 
-void MainScreen::upRowsMoveDown(int row){
+
+void MainScreen::aboveCellsFall(int row){
     for(int i = row; i > 1; i--){
         for(int j = 1; j < ColNumbers - 1; j++){
             cells[i][j] = cells[i - 1][j];
         }
-        removeOneRow(i - 1);
     }
 }
 
 void MainScreen::remove(){
-    int row = RowNumbers - 2;
+    int row = RowNumbers - 2;// 从最后一行方块开始消除
     while(row > 1){
         if(!rowCanRemove(row)) {
             row--;
             continue;
         }
-        removeOneRow(row);
-        upRowsMoveDown(row);
+        aboveCellsFall(row);
+        usleep(200000);
         score++;
-        row = RowNumbers - 2;
     }
 }
 
