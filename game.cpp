@@ -27,36 +27,37 @@ std::ostream& operator<<(std::ostream& out, Cell& cell) {
         std::cout << "  ";
     } else if (cell.type == Cell::Square) {
         std::cout << "🟥";
+    }else if(cell.type == Cell::NormalString){
+        std::cout << cell.str;
     }
     return out;
 }
 
-
 MainScreen::MainScreen() {
-    cells.resize(CellNumberPerCol);
-        
-    cells[0] = std::vector<Cell>(CellNumberPerRow, Cell{Cell::TopBoundary});
-    for (int i = 1; i < CellNumberPerCol - 1; i++) {
+    cells.resize(RowNumbers);
+    
+    cells[0] = std::vector<Cell>(ColNumbers, Cell{Cell::TopBoundary});
+    for (int i = 1; i < RowNumbers - 1; i++) {
         cells[i].push_back(Cell{Cell::LeftBoundary});
-        for (int j = 1; j < CellNumberPerRow - 1; j++) {
+        for (int j = 1; j < ColNumbers - 1; j++) {
             cells[i].push_back(Cell{Cell::Space});
         }
         cells[i].push_back(Cell{Cell::RightBoundary});
+        cells[i].insert(cells[i].end(), BackColNumbers, Cell{Cell::Space});
     }
-    cells.back() = std::vector<Cell>(CellNumberPerRow, Cell{Cell::BottomBoundary});
+    cells.back() = std::vector<Cell>(ColNumbers, Cell{Cell::BottomBoundary});
 }
 bool MainScreen::canJoinInner(const ActiveShape& as){
     std::vector<Point> vp = as.activePoints();
     for(int i = 0; i < vp.size(); i++){
-        if(cells[vp[i].row][vp[i].col] == Cell{Cell::Square}) return false;
+        if(cells[vp[i].row][vp[i].col].isSquare()) return false;
     }
     return true;
 }
 
 bool MainScreen::canJoin(const ActiveShape& as){
-    return (as.isInBoundaries(0,CellNumberPerCol-1,0, CellNumberPerRow-1) && canJoinInner(as));
+    return (as.isInBoundaries(0,RowNumbers-1,0, ColNumbers-1) && canJoinInner(as));
 }
-
 
 void MainScreen::joinSquare(const ActiveShape& as) {
     if(!canJoin(as)) return;
@@ -66,18 +67,40 @@ void MainScreen::joinSquare(const ActiveShape& as) {
     }
 }
 
-void MainScreen::printScreen(const ActiveShape& as){
+void joinCell(std::vector<std::vector<Cell>>& currCells, const Point pt, const Cell& cell){
+    currCells[pt.row][pt.col] = cell;
+}
+
+void MainScreen::joinActiveShape(std::vector<std::vector<Cell>>& cells, const std::vector<Point>& p, Point point){
+    for (int i = 0; i < p.size(); i++) {
+        cells[p[i].row + point.row][p[i].col + point.col] = Cell{Cell::Square};
+    }
+}
+
+void MainScreen::printScreen(const ActiveShape& as, const ActiveShape& nextAs){
     auto currCells = cells;
     
-    // join as
+    // join currAs
     std::vector<Point> vp = as.activePoints();
-    for (int i = 0; i < vp.size(); i++) {
-        currCells[vp[i].row][vp[i].col] = Cell{Cell::Square};
-    }
+    joinActiveShape(currCells, vp, Point(0, 0));
     
+    //join nextAs
+    joinCell(currCells, Point(NextBegin, ColNumbers + 1), Cell("next"));
+    std::vector<Point> nps = nextAs.activePoints();
+    Point np = Point(NextBegin + 1, ColNumbers + 1);
+    joinActiveShape(currCells, nps, Point(np.row - InitRow, np.col - InitCol));
+    
+    //join score
+    joinCell(currCells, Point(ScoreBegin, ColNumbers + 1), Cell("score"));
+    joinCell(currCells, Point(ScoreBegin + 1, ColNumbers + 1), Cell("  " + std::to_string(score)));
+    
+    //join level
+    joinCell(currCells, Point(LevelBegin, ColNumbers + 1), Cell("level"));
+    joinCell(currCells, Point(LevelBegin + 1, ColNumbers + 1), Cell("  "+std::to_string(level)));
+
     // print currCelles
-    for (int i = 0; i < CellNumberPerCol; i++) {
-        for (int j = 0; j < CellNumberPerRow; j++) {
+    for (int i = 0; i < RowNumbers; i++) {
+        for (int j = 0; j < cells[i].size(); j++) {
             std::cout << currCells[i][j];
         }
         std::cout << std::endl;
@@ -88,7 +111,7 @@ void MainScreen::printScreen(const ActiveShape& as){
 
 bool MainScreen::canRemove(int row){
     for(int i = 1; i < cells[i].size() - 1; i++){
-        if(cells[row][i] == Cell{Cell::Space}){
+        if(cells[row][i].isSpace()){
             return false;
         }
     }
@@ -98,35 +121,34 @@ bool MainScreen::canRemove(int row){
 void MainScreen::RemoveOneRow(int row){
     if(canRemove(row)){
         for(int i = 1; i < cells[i].size()-1; i++){
-            cells[row][i] = Cell{Cell::Space};
+            cells[row][i].set(Cell::Space);
         }
     }
 }
 
-std::shared_ptr<Shape> createShape(ShapeType shapeType){
+Shape createShape(ShapeType shapeType){
     switch(shapeType){
         case Square:
-            return std::shared_ptr<SquareShape> (new SquareShape());
+            return SquareShape();
         case Lineshape:
-            return std::shared_ptr<LineShape> (new LineShape());
+            return LineShape();
         case Tshape:
-            return std::shared_ptr<TShape> (new TShape());
+            return TShape();
         case LLshape:
-            return std::shared_ptr<LeftLShape> (new LeftLShape());
+            return LeftLShape();
         case RLshape:
-            return std::shared_ptr<RightLShape> (new RightLShape());
+            return RightLShape();
         case LZshape:
-            return std::shared_ptr<LeftZShape> (new LeftZShape());
+            return LeftZShape();
         case RZshape:
-            return std::shared_ptr<RightZShape> (new RightZShape());
+            return RightZShape();
         default:
             //要有默认值来处理其他情况，但是不能被用户感知到
-            return std::shared_ptr<SquareShape> (new SquareShape());
+            return  SquareShape();
     }
 }
 
 void Shape::rotate(){
-    lastCells = cells;
     std::vector<std::vector<Cell>> res;
     //把列转化为行
     for(int j = 0; j < cells[0].size(); j++){
@@ -143,11 +165,11 @@ void Shape::rotate(){
     cells = res;
 }
 
-std::vector<Point> Shape::points(){
+std::vector<Point> Shape::points() const{
     std::vector<Point> res;
     for(int i = 0; i < cells.size(); i++){
         for(int j = 0; j < cells[i].size(); j++){
-            if(cells[i][j] == Cell{Cell::Square}) {
+            if(cells[i][j].isSquare()) {
                 res.push_back(Point(i, j));
             }
         }
@@ -156,17 +178,17 @@ std::vector<Point> Shape::points(){
 }
 
 bool ActiveShape::isInBoundaries(int topIdx, int bottomIdx, int leftIdx, int rightIdx) const{
-    if(point.row <= topIdx || point.row + shape->height() > bottomIdx){ // idx + size是迭代器中end的概念，end 是无效的，可以等于bottom。
+    if(point.row <= topIdx || point.row + shape.height() > bottomIdx){ // idx + size是迭代器中end的概念，end 是无效的，可以等于bottom。
         return false;
     }
-    if(point.col <= leftIdx || point.col + shape->width() > rightIdx){
+    if(point.col <= leftIdx || point.col + shape.width() > rightIdx){
         return false;
     }
     return true;
 }
 
 std::vector<Point> ActiveShape::activePoints() const{
-    std::vector<Point> res = shape->points();
+    std::vector<Point> res = shape.points();
     for(int i = 0; i < res.size(); i++){
         res[i].row += point.row;
         res[i].col += point.col;
@@ -174,8 +196,13 @@ std::vector<Point> ActiveShape::activePoints() const{
     return res;
 }
 
+void ActiveShape::rollback(){
+    point = lastPoint;
+    shape = lastShape;
+}
 void ActiveShape::responseCommand(Command cmd){
-        lastPoint = point;
+    lastPoint = point;
+    lastShape = shape;
     switch(cmd) {
         case Down:
             point.row++;
@@ -187,11 +214,10 @@ void ActiveShape::responseCommand(Command cmd){
             point.col++;
             break;
         case Rotate:
-            shape->rotate();
+            shape.rotate();
             break;
-        /*case DownToBottom:
-            downToBottom(bottomBoundary);
-            break;*/
+        default:
+            break;
     }
 }
 
@@ -270,11 +296,24 @@ ShapeType Game::randomShape(){
     return static_cast<ShapeType> (rand() % ShapeTypeTotal);
 }
 
+void Game::downToBottom(MainScreen &ms,ActiveShape& as){
+    while(ms.canJoin(as)){
+        as.responseCommand(Down);
+    }
+    as.rollback();
+}
+
 bool Game::response(MainScreen &ms,ActiveShape& as, Command cmd){
-     as.responseCommand(cmd);
+    as.responseCommand(cmd);
+    //先处理悬空下落命令
+    if(cmd == DownToBottom){
+        downToBottom(ms, as);
+        return true;
+    }
+    //处理其他命令
      bool res = false;
      if(!ms.canJoin(as)){
-         as.rollback(cmd);
+         as.rollback();
          if(cmd == Down) {
              res = true;
          }

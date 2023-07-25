@@ -12,37 +12,23 @@
 using namespace std;
 
 int main() {
-    /*MainScreen ms;
+    MainScreen ms;
     UserCommand uc(800000);
     uc.generateCmds();
     Game game;
+    ActiveShape currAs(ms.initShapePoint(),createShape(game.randomShape()));
        while(true){
-           ActiveShape as(ms.initShapePoint(), createShape(Tshape));
-           ms.printScreen(as);
+           ActiveShape nextAs(ms.initShapePoint(),createShape(game.randomShape()));
+           ms.printScreen(currAs, nextAs);
            bool stop = false;
            while(!stop){
                Command cmd = uc.getCmd();
-               stop = game.response(ms, as, cmd);
-               ms.printScreen(as);
+               stop = game.response(ms, currAs, cmd);
+               ms.printScreen(currAs, nextAs);
            }
-           ms.joinSquare(as);
-       }*/
-    std::shared_ptr<Shape> shape = createShape(Tshape);
-    std::vector<Point> sp = shape->points();
-    for(int i = 0; i < sp.size(); i++){
-        std::cout << sp[i].row << ' ' << sp[i].col << std::endl;
-    }
-    
-    std::cout << std::endl;
-    
-    MainScreen ms;
-    ActiveShape as(ms.initShapePoint(), createShape(Tshape));
-    std::vector<Point> ap = as.activePoints();
-    for(int i = 0; i < ap.size(); i++){
-        std::cout << ap[i].row << ' ' << ap[i].col << std::endl;
-    }
-    
-    
+           ms.joinSquare(currAs);
+           currAs = nextAs;
+       }
     return 0;
 }
 

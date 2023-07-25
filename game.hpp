@@ -19,15 +19,20 @@
 #include <condition_variable>
 class Cell {
 public:
-    enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
+    enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square,NormalString};
     Cell(CellType t): type(t) {}
-    
-    bool canJoin(const Cell& cell) {return (this->type == Space || cell.type == Space);}
-    friend std::ostream& operator<<(std::ostream& out, Cell& cell);
-    bool operator==(const Cell& cell2) {return type == cell2.type;}
-    bool operator!=(const Cell& cell2) {return type != cell2.type;}
+    Cell(const std::string& s):str(s), type(NormalString){}
 private:
     CellType type;
+    std::string str;
+public:
+    bool canJoin(const Cell& cell) {return (this->type == Space || cell.type == Space);}
+    bool isSquare() const {return type == Square;}
+    bool isSpace() const {return type == Space;}
+    void set(const CellType& t) {type = t;}
+    friend std::ostream& operator<<(std::ostream& out, Cell& cell);
+    bool operator==(const Cell& cell2) const {return type == cell2.type;}
+    bool operator!=(const Cell& cell2) const {return type != cell2.type;}
 };
 
 //枚举也是一个类，是全局的，不能放在函数里边
@@ -51,17 +56,13 @@ struct Point{
 class Shape{
 private:
     std::vector<std::vector<Cell>> cells;
-    std::vector<std::vector<Cell>> lastCells;
 protected://只有子类可见
-    Shape(std::vector<std::vector<Cell>> squares){
-        cells = squares;
-    }
+    Shape(std::vector<std::vector<Cell>> squares){cells = squares;}
 public:
     void rotate();
-    void rollbackAfterRotate(){cells = lastCells;};
-    std::vector<Point> points();
-    int height(){return (int)cells.size();}
-    int width(){
+    std::vector<Point> points() const;
+    int height() const {return (int)cells.size();}
+    int width() const {
         if(cells.size() == 0) return 0;
         return (int)cells[0].size();
     }
@@ -137,48 +138,53 @@ enum Command {
 class ActiveShape{
 private:
     Point point;
-    std::shared_ptr<Shape> shape;
+    Shape shape;
     
     Point lastPoint;
-    std::shared_ptr<Shape> lastShape;
+    Shape lastShape;
 public:
-    ActiveShape(Point pt, const std::shared_ptr<Shape>& shapes): point(pt), shape(shapes),lastPoint(pt),lastShape(shapes){}
+    ActiveShape(Point pt, const Shape& shapes): point(pt), shape(shapes),lastPoint(pt),lastShape(shapes){}
     void responseCommand(Command cmd);
-    void rollback(Command cmd){
-        point = lastPoint;
-        if(cmd == Rotate){
-            shape->rollbackAfterRotate();
-        }
-    }
-    std::vector<Point> activePoints() const;
+    void rollback();
+    std::vector<Point> activePoints()const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
-    
-    
 };
 
 class MainScreen {
 private:
-    const int CellNumberPerRow = 12;
-    const int CellNumberPerCol = 22;
-    const int initRow = 1;
-    const int initCol = 4;
+    const int RowNumbers = 22;
+    const int ColNumbers = 12;
+    
+    const int InitRow = 1;
+    const int InitCol = 4;
+    
+    const int BackColNumbers = 6;
+    const int NextBegin = 3;
+    const int ScoreBegin = 10;
+    const int LevelBegin = 15;
+    
+    int score = 0;
+    int level = 1;
+    
 public:
     std::vector<std::vector<Cell>> cells;
     MainScreen();
-    Point initShapePoint(){return Point(initRow, initCol);}
-    int width() {return CellNumberPerRow;}
-    int height() {return CellNumberPerCol;}
+    Point initShapePoint(){return Point(InitRow, InitCol);}
+    int width() {return ColNumbers;}
+    int height() {return RowNumbers;}
     bool canJoin(const ActiveShape& as);
     void joinSquare(const ActiveShape& as);
-    void printScreen(const ActiveShape& as);
+    void printScreen(const ActiveShape& as, const ActiveShape& nextAs);
     
 private:
+    void joinLevel(std::vector<std::vector<Cell>>& currCells, const Point pt, const Cell& cell);
+    void joinActiveShape(std::vector<std::vector<Cell>>& cells, const std::vector<Point>& p, Point point);
     bool canJoinInner(const ActiveShape& as);
     bool canRemove(int row);
     void RemoveOneRow(int row);
 };
 
-std::shared_ptr<Shape> createShape(ShapeType shapeType);
+Shape createShape(ShapeType shapeType);
 
 class UserCommand{
 private:
@@ -212,6 +218,7 @@ public:
     ShapeType randomShape();
 public:
     bool response(MainScreen &ms,ActiveShape& as, Command cmd);
+    void downToBottom(MainScreen &ms,ActiveShape& as);
     void run();
 };
 #endif /* game_hpp */
