@@ -27,6 +27,8 @@ int main() {
                ms.printScreen(currAs, nextAs);
            }
            ms.joinSquare(currAs);
+           ms.remove();
+           ms.printScreen(currAs, nextAs);
            currAs = nextAs;
        }
     return 0;

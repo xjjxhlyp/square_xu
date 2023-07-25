@@ -109,8 +109,8 @@ void MainScreen::printScreen(const ActiveShape& as, const ActiveShape& nextAs){
     printf("\033[23A");//\033表示光标向上移动；23表示上移23行
 }
 
-bool MainScreen::canRemove(int row){
-    for(int i = 1; i < cells[i].size() - 1; i++){
+bool MainScreen::rowCanRemove(int row){
+    for(int i = 1; i < ColNumbers - 1; i++){
         if(cells[row][i].isSpace()){
             return false;
         }
@@ -118,11 +118,32 @@ bool MainScreen::canRemove(int row){
     return true;
 }
 
-void MainScreen::RemoveOneRow(int row){
-    if(canRemove(row)){
-        for(int i = 1; i < cells[i].size()-1; i++){
-            cells[row][i].set(Cell::Space);
+void MainScreen::removeOneRow(int row){
+    for(int i = 1; i < ColNumbers-1; i++){
+        cells[row][i].set(Cell::Space);
+    }
+}
+
+void MainScreen::upRowsMoveDown(int row){
+    for(int i = row; i > 1; i--){
+        for(int j = 1; j < ColNumbers - 1; j++){
+            cells[i][j] = cells[i - 1][j];
         }
+        removeOneRow(i - 1);
+    }
+}
+
+void MainScreen::remove(){
+    int row = RowNumbers - 2;
+    while(row > 1){
+        if(!rowCanRemove(row)) {
+            row--;
+            continue;
+        }
+        removeOneRow(row);
+        upRowsMoveDown(row);
+        score++;
+        row = RowNumbers - 2;
     }
 }
 
