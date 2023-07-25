@@ -217,9 +217,33 @@ public:
 class Game{
 public:
     ShapeType randomShape();
-public:
     bool response(MainScreen &ms,ActiveShape& as, Command cmd);
     void downToBottom(MainScreen &ms,ActiveShape& as);
-    void run();
+    
+public:
+    void run(){
+        MainScreen ms;
+        UserCommand uc(300000);
+        uc.generateCmds();
+        ActiveShape currAs(ms.initShapePoint(),createShape(randomShape()));
+        while(true){
+            ActiveShape nextAs(ms.initShapePoint(),createShape(randomShape()));
+            if(!ms.canJoin(currAs)) {
+                printf("\033[01;34m Game Over!");
+                break;
+            }
+            ms.printScreen(currAs, nextAs);
+            bool stop = false;
+            while(!stop){
+                Command cmd = uc.getCmd();
+                stop = response(ms, currAs, cmd);
+                ms.printScreen(currAs, nextAs);
+            }
+            ms.joinSquare(currAs);
+            ms.remove();
+            ms.printScreen(currAs, nextAs);
+            currAs = nextAs;
+        }
+    };
 };
 #endif /* game_hpp */

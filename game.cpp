@@ -336,8 +336,4 @@ bool Game::response(MainScreen &ms,ActiveShape& as, Command cmd){
     return res;
  }
 
-void Game::run(){
-    MainScreen ms;
-    UserCommand uc(800000);
-    uc.generateCmds();
-}
+
