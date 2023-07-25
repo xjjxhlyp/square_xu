@@ -165,7 +165,10 @@ private:
     
     int score = 0;
     int level = 1;
-    
+    const int ScoreSpan = 1;
+    const int InitialDownPeriod = 900000;
+    const int PeriodSpanOfEveryLevel = 200000;
+    const int FinalDownPeriod = 100000;
 public:
     std::vector<std::vector<Cell>> cells;
     MainScreen();
@@ -176,13 +179,26 @@ public:
     void joinSquare(const ActiveShape& as);
     void printScreen(const ActiveShape& as, const ActiveShape& nextAs);
     void remove();
+    int downPeriod(){
+        int period = InitialDownPeriod;
+        if(period > FinalDownPeriod){
+            period -= (level-1) * PeriodSpanOfEveryLevel;
+        }else{
+            period = FinalDownPeriod;
+        }
+        return period;
+    }
 private:
     void joinLevel(std::vector<std::vector<Cell>>& currCells, const Point pt, const Cell& cell);
     void joinActiveShape(std::vector<std::vector<Cell>>& cells, const std::vector<Point>& p, Point point);
     bool canJoinInner(const ActiveShape& as);
     bool rowCanRemove(int row);
     void aboveCellsFall(int row);
-    
+    void changeLevel(){
+        if(score == level * ScoreSpan){
+            level++;
+        }
+    }
 };
 
 Shape createShape(ShapeType shapeType);
@@ -206,7 +222,9 @@ public:
     void generateCmds();
     void changeDownPeriod(int downPeriod){
         std::unique_lock<std::mutex> ulPeriod(mtx_sleep);
+        std::cout << micro_seconds << std::endl;
         micro_seconds = downPeriod;
+        
     }
     int getDownPeriod(){
         std::unique_lock<std::mutex> ulPeriod(mtx_sleep);
@@ -223,11 +241,11 @@ public:
 public:
     void run(){
         MainScreen ms;
-        UserCommand uc(300000);
+        UserCommand uc(ms.downPeriod());
         uc.generateCmds();
-        ActiveShape currAs(ms.initShapePoint(),createShape(randomShape()));
+        ActiveShape currAs(ms.initShapePoint(),createShape(Lineshape));
         while(true){
-            ActiveShape nextAs(ms.initShapePoint(),createShape(randomShape()));
+            ActiveShape nextAs(ms.initShapePoint(),createShape(Lineshape));
             if(!ms.canJoin(currAs)) {
                 printf("\033[01;34m Game Over!");
                 break;
@@ -241,7 +259,7 @@ public:
             }
             ms.joinSquare(currAs);
             ms.remove();
-            ms.printScreen(currAs, nextAs);
+            uc.changeDownPeriod(ms.downPeriod());
             currAs = nextAs;
         }
     };

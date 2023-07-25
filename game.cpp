@@ -138,6 +138,7 @@ void MainScreen::remove(){
         aboveCellsFall(row);
         usleep(200000);
         score++;
+        changeLevel();
     }
 }
 
