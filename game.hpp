@@ -19,10 +19,12 @@
 #include <condition_variable>
 class Cell {
 public:
-    enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square};
+    enum CellType{Unknown, LeftBoundary, RightBoundary, TopBoundary, BottomBoundary, Space, Square,NormalString};
     Cell(CellType t): type(t) {}
+    Cell(const std::string& s):str(s), type(NormalString){}
 private:
     CellType type;
+    std::string str;
 public:
     bool canJoin(const Cell& cell) {return (this->type == Space || cell.type == Space);}
     bool isSquare() const {return type == Square;}
@@ -54,7 +56,6 @@ struct Point{
 class Shape{
 private:
     std::vector<std::vector<Cell>> cells;
-    std::vector<std::vector<Cell>> lastCells;
 protected://只有子类可见
     Shape(std::vector<std::vector<Cell>> squares){cells = squares;}
 public:
@@ -144,45 +145,40 @@ private:
 public:
     ActiveShape(Point pt, const Shape& shapes): point(pt), shape(shapes),lastPoint(pt),lastShape(shapes){}
     void responseCommand(Command cmd);
-    void rollback(Command cmd);
+    void rollback();
     std::vector<Point> activePoints()const;
     bool isInBoundaries(int top, int bottom, int left, int right) const;
 };
 
 class MainScreen {
 private:
-    const int CellNumberPerRow = 12;
-    const int CellNumberPerCol = 22;
+    const int RowNumbers = 22;
+    const int ColNumbers = 12;
     
-    const int initRow = 1;
-    const int initCol = 4;
+    const int InitRow = 1;
+    const int InitCol = 4;
     
-    const int nextBegin = 2;
-    const int scoresBegin = 10;
-    const int levelBegin = 15;
-
+    const int BackColNumbers = 6;
+    const int NextBegin = 3;
+    const int ScoreBegin = 10;
+    const int LevelBegin = 15;
+    
     int score = 0;
     int level = 1;
     
 public:
     std::vector<std::vector<Cell>> cells;
     MainScreen();
-    Point initShapePoint(){return Point(initRow, initCol);}
-    int width() {return CellNumberPerRow;}
-    int height() {return CellNumberPerCol;}
+    Point initShapePoint(){return Point(InitRow, InitCol);}
+    int width() {return ColNumbers;}
+    int height() {return RowNumbers;}
     bool canJoin(const ActiveShape& as);
     void joinSquare(const ActiveShape& as);
-    void printScore(){
-        std::cout << "  ";
-        std::cout << "scores : " << score;
-    }
-    void printLevel(){
-        std::cout << "  ";
-        std::cout << "level : " << level;
-    }
-    void printScreen(const ActiveShape& as);
+    void printScreen(const ActiveShape& as, const ActiveShape& nextAs);
     
 private:
+    void joinLevel(std::vector<std::vector<Cell>>& currCells, const Point pt, const Cell& cell);
+    void joinActiveShape(std::vector<std::vector<Cell>>& cells, const std::vector<Point>& p, Point point);
     bool canJoinInner(const ActiveShape& as);
     bool canRemove(int row);
     void RemoveOneRow(int row);
