@@ -35,7 +35,7 @@ std::ostream& operator<<(std::ostream& out, Cell& cell) {
 
 MainScreen::MainScreen() {
     cells.resize(RowNumbers);
-        
+    
     cells[0] = std::vector<Cell>(ColNumbers, Cell{Cell::TopBoundary});
     for (int i = 1; i < RowNumbers - 1; i++) {
         cells[i].push_back(Cell{Cell::LeftBoundary});
@@ -77,11 +77,6 @@ void MainScreen::joinActiveShape(std::vector<std::vector<Cell>>& cells, const st
     }
 }
 
-void MainScreen::joinLevel(std::vector<std::vector<Cell>>& currCells, const Point pt, const Cell& cell){
-    
-}
-
-
 void MainScreen::printScreen(const ActiveShape& as, const ActiveShape& nextAs){
     auto currCells = cells;
     
@@ -94,7 +89,6 @@ void MainScreen::printScreen(const ActiveShape& as, const ActiveShape& nextAs){
     std::vector<Point> nps = nextAs.activePoints();
     Point np = Point(NextBegin + 1, ColNumbers + 1);
     joinActiveShape(currCells, nps, Point(np.row - InitRow, np.col - InitCol));
-    
     
     //join score
     joinCell(currCells, Point(ScoreBegin, ColNumbers + 1), Cell("score"));
