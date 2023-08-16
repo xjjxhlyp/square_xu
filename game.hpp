@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <string>
 #include <queue>
+#include <atomic>
 #include <condition_variable>
 class Cell {
 public:
@@ -66,7 +67,6 @@ public:
         if(cells.size() == 0) return 0;
         return (int)cells[0].size();
     }
-    
 };
 
 class SquareShape : public Shape{
@@ -132,7 +132,8 @@ enum Command {
     Left,
     Right,
     Rotate,
-    DownToBottom
+    DownToBottom,
+    SuspendOrStart
 };
 
 class ActiveShape{
@@ -179,15 +180,7 @@ public:
     void joinSquare(const ActiveShape& as);
     void printScreen(const ActiveShape& as, const ActiveShape& nextAs);
     void remove();
-    int downPeriod(){
-        int period = InitialDownPeriod;
-        if(period > FinalDownPeriod){
-            period -= (level-1) * PeriodSpanOfEveryLevel;
-        }else{
-            period = FinalDownPeriod;
-        }
-        return period;
-    }
+    int downPeriod();
 private:
     void joinLevel(std::vector<std::vector<Cell>>& currCells, const Point pt, const Cell& cell);
     void joinActiveShape(std::vector<std::vector<Cell>>& cells, const std::vector<Point>& p, Point point);
@@ -211,21 +204,18 @@ private:
     
     int micro_seconds;
     std::mutex mtx_sleep;
+    
+    std::atomic<bool> isSuspend;
 private:
     char getchar_no_output();
     void receiveCommand();
     Command transformInputToCommand(char ch);
     void downPeriodly();
 public:
-    UserCommand(int period):micro_seconds(period){};
+    UserCommand(int period):micro_seconds(period), isSuspend(false){};
     Command getCmd();
     void generateCmds();
-    void changeDownPeriod(int downPeriod){
-        std::unique_lock<std::mutex> ulPeriod(mtx_sleep);
-        std::cout << micro_seconds << std::endl;
-        micro_seconds = downPeriod;
-        
-    }
+    void changeDownPeriod(int downPeriod);
     int getDownPeriod(){
         std::unique_lock<std::mutex> ulPeriod(mtx_sleep);
         return micro_seconds;

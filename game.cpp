@@ -118,8 +118,6 @@ bool MainScreen::rowCanRemove(int row){
     return true;
 }
 
-
-
 void MainScreen::aboveCellsFall(int row){
     for(int i = row; i > 1; i--){
         for(int j = 1; j < ColNumbers - 1; j++){
@@ -255,6 +253,7 @@ Command UserCommand::transformInputToCommand(char ch){
     const int right = 67;
     const int downToBottom = 32;
     const int rotate = 65;
+    const int suspendOrStart = 's';
     switch(ch){
         case down:
             return Down;
@@ -266,15 +265,20 @@ Command UserCommand::transformInputToCommand(char ch){
             return DownToBottom;
         case rotate:
             return Rotate;
+        case suspendOrStart:
+            isSuspend = !isSuspend;
     }
     return Unknown;
 }
 
 void UserCommand::receiveCommand(){
     system("stty -icanon");//直接接收一个字符，不用回车结束
-    while(true){
+    while (true){
         Command cmd = transformInputToCommand(getchar_no_output());
-        if(cmd == Unknown) continue;
+        if (cmd == Unknown) continue;
+        if (isSuspend && cmd != SuspendOrStart) {
+            continue;
+        }
         std::unique_lock<std::mutex> ul(mtx);
         cmds.push(cmd);
         cv.notify_one();
@@ -284,6 +288,7 @@ void UserCommand::receiveCommand(){
 void UserCommand::downPeriodly(){
     while(true){
         usleep(getDownPeriod());
+        if (isSuspend) continue;
         std::unique_lock<std::mutex> ul(mtx);
         cmds.push(Down);
         cv.notify_one();
@@ -306,6 +311,12 @@ void UserCommand::generateCmds(){
     th.detach();
     std::thread thPeriod(&UserCommand::downPeriodly, this);
     thPeriod.detach();
+}
+
+void UserCommand::changeDownPeriod(int downPeriod){
+    std::unique_lock<std::mutex> ulPeriod(mtx_sleep);
+    std::cout << micro_seconds << std::endl;
+    micro_seconds = downPeriod;
 }
 
 ShapeType Game::randomShape(){
